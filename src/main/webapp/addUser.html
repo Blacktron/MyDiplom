@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+	<script type="text/javascript">
+		function addUser() {
+			var firstName = $('#fname').val();
+			var lastName = $('#lname').val();
+			var years = $('#age').val();
+			var lang1 = $('#language1').val();
+			var lang2 = $('#language2').val();
+			var lang3 = $('#language3').val();
+
+			var user = {
+				firstName : firstName,
+				lastName : lastName,
+				age : years,
+				language1 : lang1,
+				language2 : lang2,
+				language3 : lang3
+			};
+
+			console.log(user);
+
+			$.ajax({
+				url: '/rest/cand/addCandidate',
+				method: 'POST',
+                dataType: 'json',
+                contentType: "application/json; charset=utf-8",
+				data: JSON.stringify(user),
+				success: function() {
+					alert("Operation completed successfully");
+				},
+				error: function() {
+				    alert("Something broke");
+				}
+			});
+		}
+	</script>
+	<meta charset="UTF-8">
+	<title>Add User</title>
+</head>
+<body>
+	<form method="POST">
+		<label for="fname">First Name:</label>
+		<input type="text" companyName="fname" id="fname" autofocus="autofocus"> <br />
+
+		<label for="lname">Last Name:</label>
+		<input type="text" companyName="lname" id="lname"> <br />
+
+		<label for="age">Age:</label>
+		<input type="text" companyName="age" id="age"> <br />
+
+		<label for="language1">Language 1:</label>
+		<input type="text" companyName="language1" id="language1"> <br />
+
+		<label for="language2">Language 2:</label>
+		<input type="text" companyName="language2" id="language2"> <br />
+
+		<label for="language3">Language 3:</label>
+		<input type="text" companyName="language3" id="language3"> <br />
+
+		<input type="button" value="Add New User" onclick="addUser()" />
+	</form>
+</body>
+</html>

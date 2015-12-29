@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component LANGUAGE_LEVEL="JDK_1_5" inheritJdk="true">
+	<output-test url="file://$MODULE_DIR$/target/test-classes"/>
+	<contentEntry url="file://$MODULE_DIR$">
+		<excludeFolder url="file://$MODULE_DIR$/target"/>
+	</contentEntry>
+	<lib name="Maven: junit:junit:3.8.1" scope="TEST"/>
+	<levels>
+		<level name="servlet-api" value="project"/>
+		<level name="Maven: junit:junit:3.8.1" value="project"/>
+		<level name="Maven: org.glassfish.jersey.containers:jersey-container-servlet:2.21" value="project"/>
+		<level name="Maven: org.glassfish.jersey.containers:jersey-container-servlet-core:2.21" value="project"/>
+		<level name="Maven: org.glassfish.jersey.core:jersey-common:2.21" value="project"/>
+		<level name="Maven: org.glassfish.jersey.bundles.repackaged:jersey-guava:2.21" value="project"/>
+		<level name="Maven: org.glassfish.hk2:osgi-resource-locator:1.0.1" value="project"/>
+		<level name="Maven: javax.ws.rs:javax.ws.rs-api:2.0.1" value="project"/>
+		<level name="Maven: org.glassfish.jersey.core:jersey-server:2.21" value="project"/>
+		<level name="Maven: org.glassfish.jersey.core:jersey-client:2.21" value="project"/>
+		<level name="Maven: org.glassfish.jersey.media:jersey-media-jaxb:2.21" value="project"/>
+		<level name="Maven: javax.annotation:javax.annotation-api:1.2" value="project"/>
+		<level name="Maven: org.glassfish.hk2:hk2-api:2.4.0-b31" value="project"/>
+		<level name="Maven: org.glassfish.hk2:hk2-utils:2.4.0-b31" value="project"/>
+		<level name="Maven: org.glassfish.hk2.external:aopalliance-repackaged:2.4.0-b31" value="project"/>
+		<level name="Maven: org.glassfish.hk2.external:javax.inject:2.4.0-b31" value="project"/>
+		<level name="Maven: org.glassfish.hk2:hk2-locator:2.4.0-b31" value="project"/>
+		<level name="Maven: org.javassist:javassist:3.18.1-GA" value="project"/>
+		<level name="Maven: javax.validation:validation-api:1.1.0.Final" value="project"/>
+		<level name="Maven: org.glassfish.jersey.media:jersey-media-json-jackson:2.21" value="project"/>
+		<level name="Maven: org.glassfish.jersey.ext:jersey-entity-filtering:2.21" value="project"/>
+		<level name="Maven: com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.5.4" value="project"/>
+		<level name="Maven: com.fasterxml.jackson.core:jackson-core:2.5.4" value="project"/>
+		<level name="Maven: com.fasterxml.jackson.core:jackson-databind:2.5.4" value="project"/>
+		<level name="Maven: com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.5.4" value="project"/>
+		<level name="Maven: com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.5.4" value="project"/>
+		<level name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.5.4" value="project"/>
+		<level name="Maven: mysql:mysql-connector-java:5.1.37" value="project"/>
+	</levels>
+</component>

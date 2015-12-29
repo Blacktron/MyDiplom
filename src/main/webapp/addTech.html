@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script type="text/javascript">
+        function addTech() {
+            var techName = $('#tech').val();
+            var myTech = { companyName: techName };
+
+            $.ajax({
+                method: 'POST',
+                dataType: 'json',
+                url: '/rest/tech/addTechnology',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(myTech),
+                success: function() {
+                    alert("Operation completed successfully");
+                },
+                error: function() {
+                    alert("Something broke");
+                }
+            });
+        }
+    </script>
+    <meta charset="UTF-8">
+    <title>Add Technology</title>
+</head>
+<body>
+    <form method="POST">
+        <label for="tech">Technology Name:</label>
+        <input type="text" companyName="tech" id="tech" autofocus="autofocus"> <br />
+        <input type="button" value="Add Tech" onclick="addTech()"/>
+    </form>
+</body>
+</html>

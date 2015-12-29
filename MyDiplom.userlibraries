@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eclipse-userlibraries>
+  <library companyName="Maven: org.glassfish.jersey.media:jersey-media-jaxb:2.21">
+    <archive path="C:/Users/Terrax/.m2/repository/org/glassfish/jersey/media/jersey-media-jaxb/2.21/jersey-media-jaxb-2.21.jar" />
+  </library>
+  <library companyName="Maven: com.fasterxml.jackson.core:jackson-core:2.5.4">
+    <archive path="C:/Users/Terrax/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.5.4/jackson-core-2.5.4.jar" />
+  </library>
+  <library companyName="Maven: org.glassfish.jersey.core:jersey-client:2.21">
+    <archive path="C:/Users/Terrax/.m2/repository/org/glassfish/jersey/core/jersey-client/2.21/jersey-client-2.21.jar" />
+  </library>
+  <library companyName="mysql-connector-java-5.1.21">
+    <archive path="C:/Users/Terrax/Documents/IntelliJProjects/MyDiplom/target/MyDiplom/WEB-INF/lib/mysql-connector-java-5.1.21.jar" />
+  </library>
+  <library companyName="Maven: org.glassfish.jersey.bundles.repackaged:jersey-guava:2.21">
+    <archive path="C:/Users/Terrax/.m2/repository/org/glassfish/jersey/bundles/repackaged/jersey-guava/2.21/jersey-guava-2.21.jar" />
+  </library>
+  <library companyName="Maven: org.glassfish.hk2:hk2-api:2.4.0-b31">
+    <archive path="C:/Users/Terrax/.m2/repository/org/glassfish/hk2/hk2-api/2.4.0-b31/hk2-api-2.4.0-b31.jar" />
+  </library>
+  <library companyName="Maven: javax.ws.rs:javax.ws.rs-api:2.0.1">
+    <archive path="C:/Users/Terrax/.m2/repository/javax/ws/rs/javax.ws.rs-api/2.0.1/javax.ws.rs-api-2.0.1.jar" />
+  </library>
+  <library companyName="Maven: org.glassfish:javax.json:1.0.4">
+    <archive path="C:/Users/Terrax/.m2/repository/org/glassfish/javax.json/1.0.4/javax.json-1.0.4.jar" />
+  </library>
+  <library companyName="Maven: org.glassfish.hk2.external:javax.inject:2.4.0-b31">
+    <archive path="C:/Users/Terrax/.m2/repository/org/glassfish/hk2/external/javax.inject/2.4.0-b31/javax.inject-2.4.0-b31.jar" />
+  </library>
+  <library companyName="Maven: org.glassfish.hk2.external:aopalliance-repackaged:2.4.0-b31">
+    <archive path="C:/Users/Terrax/.m2/repository/org/glassfish/hk2/external/aopalliance-repackaged/2.4.0-b31/aopalliance-repackaged-2.4.0-b31.jar" />
+  </library>
+  <library companyName="Maven: org.glassfish.jersey.core:jersey-common:2.21">
+    <archive path="C:/Users/Terrax/.m2/repository/org/glassfish/jersey/core/jersey-common/2.21/jersey-common-2.21.jar" />
+  </library>
+  <library companyName="Maven: org.glassfish.jersey.containers:jersey-container-servlet:2.21">
+    <archive path="C:/Users/Terrax/.m2/repository/org/glassfish/jersey/containers/jersey-container-servlet/2.21/jersey-container-servlet-2.21.jar" />
+  </library>
+  <library companyName="Maven: org.glassfish.jersey.core:jersey-server:2.21">
+    <archive path="C:/Users/Terrax/.m2/repository/org/glassfish/jersey/core/jersey-server/2.21/jersey-server-2.21.jar" />
+  </library>
+  <library companyName="Maven: org.glassfish.jersey.containers:jersey-container-servlet-core:2.21">
+    <archive path="C:/Users/Terrax/.m2/repository/org/glassfish/jersey/containers/jersey-container-servlet-core/2.21/jersey-container-servlet-core-2.21.jar" />
+  </library>
+  <library companyName="Maven: javax.annotation:javax.annotation-api:1.2">
+    <archive path="C:/Users/Terrax/.m2/repository/javax/annotation/javax.annotation-api/1.2/javax.annotation-api-1.2.jar" />
+  </library>
+  <library companyName="Maven: org.glassfish.jersey.media:jersey-media-json-jackson:2.21">
+    <archive path="C:/Users/Terrax/.m2/repository/org/glassfish/jersey/media/jersey-media-json-jackson/2.21/jersey-media-json-jackson-2.21.jar" />
+  </library>
+  <library companyName="servlet-api">
+    <archive path="C:/Users/Terrax/Documents/Dev/apache-tomcat-8.0.24/lib/servlet-api.jar" />
+  </library>
+  <library companyName="Maven: com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.5.4">
+    <archive path="C:/Users/Terrax/.m2/repository/com/fasterxml/jackson/jaxrs/jackson-jaxrs-json-provider/2.5.4/jackson-jaxrs-json-provider-2.5.4.jar" />
+  </library>
+  <library companyName="Maven: javax.validation:validation-api:1.1.0.Final">
+    <archive path="C:/Users/Terrax/.m2/repository/javax/validation/validation-api/1.1.0.Final/validation-api-1.1.0.Final.jar" />
+  </library>
+  <library companyName="Maven: org.glassfish.hk2:osgi-resource-locator:1.0.1">
+    <archive path="C:/Users/Terrax/.m2/repository/org/glassfish/hk2/osgi-resource-locator/1.0.1/osgi-resource-locator-1.0.1.jar" />
+  </library>
+  <library companyName="Maven: junit:junit:3.8.1">
+    <archive path="C:/Users/Terrax/.m2/repository/junit/junit/3.8.1/junit-3.8.1.jar" />
+  </library>
+  <library companyName="Maven: org.glassfish.hk2:hk2-locator:2.4.0-b31">
+    <archive path="C:/Users/Terrax/.m2/repository/org/glassfish/hk2/hk2-locator/2.4.0-b31/hk2-locator-2.4.0-b31.jar" />
+  </library>
+  <library companyName="Maven: com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.5.4">
+    <archive path="C:/Users/Terrax/.m2/repository/com/fasterxml/jackson/jaxrs/jackson-jaxrs-base/2.5.4/jackson-jaxrs-base-2.5.4.jar" />
+  </library>
+  <library companyName="Maven: com.fasterxml.jackson.core:jackson-databind:2.5.4">
+    <archive path="C:/Users/Terrax/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.5.4/jackson-databind-2.5.4.jar" />
+  </library>
+  <library companyName="Maven: com.fasterxml.jackson.core:jackson-annotations:2.5.4">
+    <archive path="C:/Users/Terrax/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.5.4/jackson-annotations-2.5.4.jar" />
+  </library>
+  <library companyName="Maven: com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.5.4">
+    <archive path="C:/Users/Terrax/.m2/repository/com/fasterxml/jackson/module/jackson-module-jaxb-annotations/2.5.4/jackson-module-jaxb-annotations-2.5.4.jar" />
+  </library>
+  <library companyName="Maven: org.javassist:javassist:3.18.1-GA">
+    <archive path="C:/Users/Terrax/.m2/repository/org/javassist/javassist/3.18.1-GA/javassist-3.18.1-GA.jar" />
+  </library>
+  <library companyName="Maven: org.glassfish.hk2:hk2-utils:2.4.0-b31">
+    <archive path="C:/Users/Terrax/.m2/repository/org/glassfish/hk2/hk2-utils/2.4.0-b31/hk2-utils-2.4.0-b31.jar" />
+  </library>
+  <library companyName="Maven: org.glassfish.jersey.ext:jersey-entity-filtering:2.21">
+    <archive path="C:/Users/Terrax/.m2/repository/org/glassfish/jersey/ext/jersey-entity-filtering/2.21/jersey-entity-filtering-2.21.jar" />
+  </library>
+</eclipse-userlibraries>
+
