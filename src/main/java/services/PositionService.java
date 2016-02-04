@@ -3,7 +3,6 @@ package services;
 import com.fasterxml.jackson.databind.JsonNode;
 import db.DBPositionQueryHandler;
 import models.Entity;
-import models.implementation.Position;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
@@ -18,9 +17,9 @@ import java.util.List;
 public class PositionService {
 
     /**
-     * A method which searches for a position using ID as criteria.
+     * A method which searches for a Position using ID as criteria.
      * @param positionId the ID which to be searched.
-     * @return the position if such is found.
+     * @return the Position if such is found.
      */
     @GET
     @Path("{id}")
@@ -44,8 +43,8 @@ public class PositionService {
     }
 
     /**
-     * Create a new position and insert it into the database.
-     * @param node the details from which the position will be created.
+     * Create a new Position and insert it into the database.
+     * @param node the details from which the Position will be created..
      * @return the response from the database (either successful or failed creation).
      */
     @POST
@@ -54,23 +53,24 @@ public class PositionService {
     public Response addPosition(JsonNode node) {
         System.out.println("POST /positions add");
 
-        String positionName = node.get("positionName").textValue();
-        int hrId = Integer.parseInt(node.get("hrId").textValue());
-        int companyIdId = Integer.parseInt(node.get("companyId").textValue());
-
-        Position position = new Position(hrId, companyIdId, positionName);
+        boolean check;
 
         try {
-            DBPositionQueryHandler.getInstance().addEntity(position);
+            check = DBPositionQueryHandler.getInstance().addEntity(node);
         } catch (SQLException e) {
             e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
-        return Response.ok("{\"Status\" : \"OK\"}").build();
+        if (check) {
+            return Response.ok("{\"Status\" : \"OK\"}").build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Unable to add the new Position!!!\"").build();
+        }
     }
 
     /**
-     * Deletes a position from the database.
+     * Deletes a Position from the database.
      * @param positionId the ID of the position to be deleted.
      * @return the response from the database (either successful or failed deletion).
      */
@@ -93,9 +93,9 @@ public class PositionService {
     }
 
     /**
-     * Searches for positions in the database by provided first and last name. If such are not provided the default
-     * action is to query the database for all positions entered so far.
-     * @return the position searched for or all positions entered into the database so far.
+     * Searches for Positions in the database by provided first and last name. If such are not provided the default
+     * action is to query the database for all Positions entered so far.
+     * @return the Position searched for or all Positions entered into the database so far.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -119,38 +119,26 @@ public class PositionService {
     }
 
     /**
-     * Edits the details of the selected position.
-     * @param positionId the ID of the position.
+     * Edits the details of the selected Position.
+     * @param posId the ID of the Position to be edited.
      * @param positionDetails the new details which should be set in the database.
      * @return the response from the database (either successful or failed modification).
      */
     @POST
-    @Path("{id}")
+    @Path("{posId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response editPosition(@PathParam("id") String positionId, JsonNode positionDetails) {
+    public Response editPosition(@PathParam("posId") String posId, JsonNode positionDetails) {
         System.out.println("POST /positions edit");
 
+        int positionId = Integer.parseInt(posId);
+
         try {
-            int id = Integer.parseInt(positionId);
-            Entity entity = DBPositionQueryHandler.getInstance().searchEntityById(id);
-            Position position = null;
+            boolean check = DBPositionQueryHandler.getInstance().updateEntity(positionId, positionDetails);
 
-            if (entity instanceof Position) {
-                position = (Position) entity;
-            }
-
-            if (position != null) {
-                Position newPosition = new Position();
-                newPosition.setId(id);
-                newPosition.setHrId(Integer.parseInt(positionDetails.get("hrId").textValue()));
-                newPosition.setCompanyId(Integer.parseInt(positionDetails.get("companyId").textValue()));
-                newPosition.setPositionName(positionDetails.get("positionName").textValue());
-
-                DBPositionQueryHandler.getInstance().updateEntity(newPosition);
-
-                return Response.ok("{\"Status\" : \"Position with ID " + id + " was successfully modified!\"}").build();
+            if (check) {
+                return Response.ok("{\"Status\" : \"Candidate with ID " + positionId + " was successfully modified!\"}").build();
             } else {
-                return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Position with ID " + id + " does not exists\"}").build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Position with ID " + positionId + " does not exists\"}").build();
             }
         } catch (NumberFormatException exception) {
             exception.printStackTrace();
@@ -158,6 +146,26 @@ public class PositionService {
         } catch (SQLException e) {
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"Error\" : \"Position with ID " + positionId + " was not modified\"}").build();
+        }
+    }
+
+    @GET
+    @Path("/match/{positionId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response searchCandidateForPosition(@PathParam("positionId") String positionId) {
+        System.out.println("GET /positions searchCandidateForPosition");
+
+        List<Entity> matches = new ArrayList<Entity>();
+        try {
+            matches = DBPositionQueryHandler.getInstance().searchForMatch(positionId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if (matches == null) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Invalid query parameters\"}").build();
+        } else {
+            return Response.ok(matches).build();
         }
     }
 }

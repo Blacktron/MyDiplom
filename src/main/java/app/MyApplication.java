@@ -16,7 +16,6 @@ public class MyApplication extends Application {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         classes.add(CandidateService.class);
         classes.add(CompanyService.class);
-        classes.add(ExperienceService.class);
         classes.add(HRService.class);
         classes.add(PositionService.class);
         classes.add(TechnologyService.class);

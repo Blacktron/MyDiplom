@@ -1,97 +1,166 @@
 package models.implementation;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import models.Entity;
+
+import java.util.List;
 
 /**
  * @Created by Terrax on 13-Sep-2015.
  */
 public class Candidate extends Entity {
-    private String firstName;
-    private String lastName;
-    private int age;
-    private String language1;
-    private String language2;
-    private String language3;
+    private String candidateFirstName;          // The first name of the Candidate.
+    private String candidateLastName;           // The last name of the Candidate.
+    private int age;                            // The age of the Candidate.
+    private List<Experience> experiences;       // The List holding the Technologies and corresponding Experience of the Candidate.
+    private List<Position> applications;        // The List holding the Positions for which the Candidate applied.
+    private int rating = 0;                     // The rating calculated for each Candidate applied for a selected Position.
 
+    /**
+     * Default constructor.
+     */
     public Candidate() { }
 
-    public Candidate(String firstName, String lastName, int age, String language1, String language2, String language3) {
-        setFirstName(firstName);
-        setLastName(lastName);
-        setAge(age);
-        setLanguage1(language1);
-        setLanguage2(language2);
-        setLanguage3(language3);
+    /**
+     * Custom constructor which builds the object based on the existing parameters.
+     * @param node the details from which to create the new object.
+     */
+    public Candidate(JsonNode node) {
+        if (node.has("candidateFirstName")) {
+            setCandidateFirstName(node.get("candidateFirstName").textValue());
+        }
+
+        if (node.has("candidateLastName")) {
+            setCandidateLastName(node.get("candidateLastName").textValue());
+        }
+
+        if (node.has("age")) {
+            int age = Integer.parseInt(node.get("age").textValue());
+            setAge(age);
+        }
     }
 
-    public Candidate(int candidateId, String firstName, String lastName, int age, String language1, String language2, String language3) {
+    /**
+     * Custom constructor which accepts six parameters. It is used when building the result after search.
+     * @param candidateId the ID of the Candidate.
+     * @param candidateFirstName the first name of the Candidate.
+     * @param candidateLastName the last name of the Candidate.
+     * @param age the age of the Candidate.
+     */
+    public Candidate(int candidateId, String candidateFirstName, String candidateLastName, int age) {
         setId(candidateId);
-        setFirstName(firstName);
-        setLastName(lastName);
+        setCandidateFirstName(candidateFirstName);
+        setCandidateLastName(candidateLastName);
         setAge(age);
-        setLanguage1(language1);
-        setLanguage2(language2);
-        setLanguage3(language3);
     }
 
-    public String getFirstName() {
-        return firstName;
+    /**
+     * Shows the first name of the Candidate.
+     * @return the first name of the Candidate.
+     */
+    public String getCandidateFirstName() {
+        return candidateFirstName;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    /**
+     * Sets the first name of the Candidate.
+     * @param candidateFirstName the first name of the Candidate.
+     */
+    public void setCandidateFirstName(String candidateFirstName) {
+        this.candidateFirstName = candidateFirstName;
     }
 
-    public String getLastName() {
-        return lastName;
+    /**
+     * Shows the last name of the Candidate.
+     * @return the last name of the Candidate.
+     */
+    public String getCandidateLastName() {
+        return candidateLastName;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    /**
+     * Sets the last name of the Candidate.
+     * @param candidateLastName the last name of the Candidate.
+     */
+    public void setCandidateLastName(String candidateLastName) {
+        this.candidateLastName = candidateLastName;
     }
 
+    /**
+     * Shows the age of the Candidate.
+     * @return the age of the Candidate.
+     */
     public int getAge() {
         return age;
     }
 
+    /**
+     * Sets the age of the Candidate.
+     * @param age the age of the Candidate.
+     */
     public void setAge(int age) {
         this.age = age;
     }
 
-    public String getLanguage1() {
-        return language1;
+    /**
+     * Shows the List with Experience of the Candidate.
+     * @return the List with Experience of the Candidate.
+     */
+    public List<Experience> getExperiences() {
+        return experiences;
     }
 
-    public void setLanguage1(String language1) {
-        this.language1 = language1;
+    /**
+     * Sets the List with Experience of the Candidate.
+     * @param experiences the List with Experience of the Candidate.
+     */
+    public void setExperiences(List<Experience> experiences) {
+        this.experiences = experiences;
     }
 
-    public String getLanguage2() {
-        return language2;
+    /**
+     * Shows the List with Positions for which the Candidate applied.
+     * @return the List with Positions for which the Candidate applied.
+     */
+    public List<Position> getApplications() {
+        return applications;
     }
 
-    public void setLanguage2(String language2) {
-        this.language2 = language2;
+    /**
+     * Sets the the List with Positions for which the Candidate applied.
+     * @param applications the List with Positions for which the Candidate applied.
+     */
+    public void setApplications(List<Position> applications) {
+        this.applications = applications;
     }
 
-    public String getLanguage3() {
-        return language3;
+    /**
+     * Shows the rating of the Candidate for a certain Position.
+     * @return the rating of the Candidate for a certain Position.
+     */
+    public int getRating() {
+        return rating;
     }
 
-    public void setLanguage3(String language3) {
-        this.language3 = language3;
+    /**
+     * Sets the rating of the Candidate for a certain Position.
+     * @param rating the rating of the Candidate for a certain Position.
+     */
+    public void setRating(int rating) {
+        this.rating = rating;
     }
 
+    /**
+     * Gets the details of the Candidate object and shows them.
+     * @return the details of the Candidate.
+     */
     @Override
     public String toString() {
         return "Candidate{" +
                 "id='" + id + '\'' +
-                "firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
+                ", candidateFirstName='" + candidateFirstName + '\'' +
+                ", candidateLastName='" + candidateLastName + '\'' +
                 ", age=" + age +
-                ", language1='" + language1 + '\'' +
-                ", language2='" + language2 + '\'' +
-                ", language3='" + language3 + '\'' +
                 '}';
     }
 }

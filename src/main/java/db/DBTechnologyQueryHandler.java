@@ -1,5 +1,6 @@
 package db;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import models.Entity;
 import models.EntityDbHandler;
 import models.implementation.Technology;
@@ -27,126 +28,56 @@ public class DBTechnologyQueryHandler implements EntityDbHandler {
     }
 
     /**
-     * Returns a list of all technologies currently entered in the database.
-     * @return the list of all technologies.
+     * Returns a list of all Technologies currently entered in the database.
+     * @return the list of all Technologies.
      * @throws SQLException
      */
     public List<Entity> getAllEntities() throws SQLException {
-        String query = "SELECT * FROM tech";
+        String query = "SELECT * FROM technology";
         return DBUtils.execQueryAndBuildResult(query, null, this);
-//        Connection connection = null;
-//        PreparedStatement statement = null;
-//        ResultSet resultSet = null;
-//
-//        try {
-//            connection = DBConnectionHandler.openDatabaseConnection();
-//            List<Entity> allTechnologies;
-//
-//            String query = "SELECT * FROM tech";
-//
-//            if (connection != null) {
-//                statement = connection.prepareStatement(query);
-//                resultSet = statement.executeQuery();
-//            }
-//
-//            allTechnologies = buildResult(resultSet);
-//
-//            return allTechnologies;
-//        } finally {
-//            if (statement != null) {
-//                statement.close();
-//            }
-//
-//            if (resultSet != null) {
-//                resultSet.close();
-//            }
-//
-//            if (connection != null) {
-//                connection.close();
-//            }
-//        }
     }
 
 
 
     /**
-     * Adds a new technology to the database.
-     * @param entity the entity holding the information to create a new entry in the database.
+     * Adds a new Technology to the database.
+     * @param node the JSON object holding the data of the Technology.
+     * @return true if the Technology was added, false otherwise.
      * @throws SQLException
      */
-    public boolean addEntity(Entity entity) throws SQLException {
+    public boolean addEntity(JsonNode node) throws SQLException {
         boolean check = false;
-        Connection connection = null;
-        PreparedStatement statement = null;
-        Technology technology = null;
+        Technology technology = new Technology(node);
 
-        // Open a connection with the database and execute the query.
-        try {
-            // Check if the entity is a Technology and cast it.
-            if (entity instanceof Technology) {
-                technology = (Technology) entity;
-            }
+        // Check if such Technology already exists in the database.
+        String technologyName = technology.getTechnologyName();
+        String technologyExistsQuery = "SELECT technology.technologyId FROM technology WHERE technologyName = ?";
+        boolean technologyExists = DBUtils.isParamExists(technologyName, technologyExistsQuery);
 
-            connection = DBConnectionHandler.openDatabaseConnection();
+        System.out.println("TECH NAME: " + technologyName);
+        System.out.println("EXISTS: " + technologyExists);
 
-            // Prepare the query and execute it.
-            assert technology != null;
-            String techName = technology.getName();
-
-            String query = "INSERT INTO tech(name) VALUES(?)";
-
-            if (connection != null) {
-                statement = connection.prepareStatement(query);
-                statement.setString(1, techName);
-
-                statement.execute();
-                check = true;
-            }
-        } finally {
-            if (statement != null) {
-                statement.close();
-            }
-
-            if (connection != null) {
-                connection.close();
-            }
+        // If there is no such Technology in the database, prepare the query and execute it.
+        if (!technologyExists) {
+            String query = "INSERT INTO technology(technologyName) VALUES(?)";
+            System.out.println("QUERY: " + query);
+            Object[] params = {technologyName};
+            DBUtils.execQuery(query, params);
+            check = true;
         }
 
         return check;
     }
 
     /**
-     * Deletes a selected technology from the database.
-     * @param techId the id of the technology to be removed.
+     * Deletes a selected Technology from the database.
+     * @param technologyId the ID of the Technology to be removed.
      * @throws SQLException
      */
-    public void deleteEntity(int techId) throws SQLException {
-        Object[] params = {techId};
-        String query = "DELETE FROM tech WHERE techId = ?";
+    public void deleteEntity(int technologyId) throws SQLException {
+        Object[] params = {technologyId};
+        String query = "DELETE FROM technology WHERE technologyId = ?";
         DBUtils.execQuery(query, params);
-//        Connection connection = null;
-//        PreparedStatement statement = null;
-//
-//        // Open a connection with the database, prepare the query and execute it.
-//        try {
-//            connection = DBConnectionHandler.openDatabaseConnection();
-//            String query = "DELETE FROM tech WHERE techId = ?";
-//
-//            if (connection != null) {
-//                statement = connection.prepareStatement(query);
-//                statement.setInt(1, id);
-//
-//                statement.execute();
-//            }
-//        } finally {
-//            if (statement != null) {
-//                statement.close();
-//            }
-//
-//            if (connection != null) {
-//                connection.close();
-//            }
-//        }
     }
 
     /**
@@ -156,33 +87,33 @@ public class DBTechnologyQueryHandler implements EntityDbHandler {
      * @throws SQLException
      */
     public List<Entity> searchEntity(MultivaluedMap<String, String> data) throws SQLException {
-        String techName = "";
+        String technologyName = "";
         List<Entity> result = null;
 
         // Check which parameters exist in the query.
-        if (data.containsKey("name")) {
-            techName = data.getFirst("name");
+        if (data.containsKey("technologyName")) {
+            technologyName = data.getFirst("technologyName");
         }
 
-        if (techName == null || techName.equals("")) {
+        if (technologyName == null || technologyName.equals("")) {
             result = this.getAllEntities();
         }
-        if (techName != null && !techName.equals("")) {
-            result = searchTechnologyByName(techName);
+        if (technologyName != null && !technologyName.equals("")) {
+            result = searchTechnologyByName(technologyName);
         }
 
         return result;
     }
 
     /**
-     * Search if technology with the specified ID exists in the database.
-     * @param techId the ID of the technology to be searched.
-     * @return the technology as object.
+     * Search if Technology with the specified ID exists in the database.
+     * @param technologyId the ID of the Technology to be searched.
+     * @return the Technology as object.
      * @throws SQLException
      */
-    public Entity searchEntityById(int techId) throws SQLException {
-        Object[] params = {techId};
-        String query = "SELECT * FROM tech WHERE techId = ?";
+    public Entity searchEntityById(int technologyId) throws SQLException {
+        Object[] params = {technologyId};
+        String query = "SELECT * FROM technology WHERE technologyId = ?";
         List<Entity> result = DBUtils.execQueryAndBuildResult(query, params, this);
 
         if (result != null && result.size() > 0) {
@@ -191,128 +122,53 @@ public class DBTechnologyQueryHandler implements EntityDbHandler {
         else {
             throw new SQLException();
         }
-
-//        Connection connection = null;
-//        PreparedStatement statement = null;
-//        ResultSet resultSet = null;
-//        Technology technology = null;
-//
-//        // Open a connection with the database, prepare the query and execute it.
-//        try {
-//            connection = DBConnectionHandler.openDatabaseConnection();
-//            String query = "SELECT * FROM tech WHERE techId = ?";
-//
-//            if (connection != null) {
-//                statement = connection.prepareStatement(query);
-//                statement.setInt(1, techId);
-//                resultSet = statement.executeQuery();
-//            }
-//
-//            if (resultSet != null) {
-//                while (resultSet.next()) {
-//                    int id = resultSet.getInt("techId");
-//                    String techName = resultSet.getString("name");
-//
-//                    technology = new Technology(id, techName);
-//                }
-//            }
-//
-//            return technology;
-//        } finally {
-//            if (statement != null) {
-//                statement.close();
-//            }
-//
-//            if (connection != null) {
-//                connection.close();
-//            }
-//        }
     }
 
     /**
-     * Search company by name if exists in the database.
-     * @param name the name of the technology to search for.
-     * @return the technology as object.
+     * Search Technology by name if exists in the database.
+     * @param technologyName the name of the Technology to search for.
+     * @return the Technology as object.
      * @throws SQLException
      */
-    private List<Entity> searchTechnologyByName(String name) throws SQLException {
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
+    private List<Entity> searchTechnologyByName(String technologyName) throws SQLException {
+        Object[] params = {technologyName};
+        String query = "SELECT * FROM technology WHERE technologyName LIKE ?";
 
-        // Open a connection with the database, prepare a List which will hold the result and execute the query.
-        try {
-            List<Entity> found;
-            connection = DBConnectionHandler.openDatabaseConnection();
-
-            String query = "SELECT * FROM tech WHERE name LIKE ?";
-
-            if (connection != null) {
-                statement = connection.prepareStatement(query);
-                statement.setString(1, "%" + name + "%");
-                resultSet = statement.executeQuery();
-            }
-
-            found = this.buildResult(resultSet);
-
-            return found;
-        } finally {
-            if (statement != null) {
-                statement.close();
-            }
-
-            if (connection != null) {
-                connection.close();
-            }
-        }
+        return DBUtils.execQueryAndBuildResult(query, params, this);
     }
 
     /**
-     * Update a technology entry in the database with provided details.
-     * @param entity the details of the technology which to be used for the modification.
+     * Update a Technology entry in the database with provided details.
+     * @param technologyId the ID of the Technology to be edited.
+     * @param node the details of the Technology which to be used for the modification.
      * @return true if the modification is successful, false otherwise.
      * @throws SQLException
      */
-    public boolean updateEntity(Entity entity) throws SQLException {
+    public boolean updateEntity(int technologyId, JsonNode node) throws SQLException {
         boolean check = false;
-        Connection connection = null;
-        PreparedStatement statement = null;
-        Technology technology = null;
 
-        // Open a connection with the database, prepare a List which will hold the result and execute the query.
-        try {
-            if (entity instanceof Technology) {
-                technology = (Technology) entity;
+        String operation = node.get("operations").textValue();
+        String query;
+        Object[] params;
+
+        // If we want to edit the name of a Technology.
+        if (operation.equalsIgnoreCase("modifyTechnology")) {
+            // Check if Technology exists in the database.
+            String technologyExistsQuery = "SELECT technologyId FROM technology WHERE technologyId = ?";
+            boolean technologyExists = DBUtils.isParamExists(technologyId, technologyExistsQuery);
+
+            // Update the Technology.
+            if (technologyExists) {
+                String technologyName = node.get("technologyName").textValue();
+                query = "UPDATE technology SET technologyName = ? WHERE technologyId = ?";
+                params = new Object[]{technologyName, technologyId};
+                DBUtils.execQuery(query, params);
             }
 
-            connection = DBConnectionHandler.openDatabaseConnection();
-
-            assert technology != null;
-            int id = technology.getId();
-            String techName = technology.getName();
-
-            String query = "UPDATE tech SET name = ? WHERE techId = ?";
-
-            if (connection != null) {
-                statement = connection.prepareStatement(query);
-
-                statement.setString(1, techName);
-                statement.setInt(2, id);
-
-                statement.executeUpdate();
-                check = true;
-            }
-
-            return check;
-        } finally {
-            if (statement != null) {
-                statement.close();
-            }
-
-            if (connection != null) {
-                connection.close();
-            }
+            check = true;
         }
+
+        return check;
     }
 
     /**
@@ -326,10 +182,10 @@ public class DBTechnologyQueryHandler implements EntityDbHandler {
         if (resultSet != null) {
             try {
                 while (resultSet.next()) {
-                    int id = resultSet.getInt("techId");
-                    String techName = resultSet.getString("name");
+                    int id = resultSet.getInt("technologyId");
+                    String technologyName = resultSet.getString("technologyName");
 
-                    Technology technology = new Technology(id, techName);
+                    Technology technology = new Technology(id, technologyName);
                     data.add(technology);
                 }
             } catch (SQLException e) {

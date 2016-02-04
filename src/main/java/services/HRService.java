@@ -19,7 +19,7 @@ public class HRService {
     /**
      * A method which searches for a HR using ID as criteria.
      * @param hrId the ID which to be searched.
-     * @return the candidate if such is found.
+     * @return the HR if such is found.
      */
     @GET
     @Path("{id}")
@@ -53,20 +53,20 @@ public class HRService {
     public Response addHR(JsonNode node) {
         System.out.println("POST /hrs add");
 
-        String firstName = node.get("firstName").textValue();
-        String lastName = node.get("lastName").textValue();
-        String phone = node.get("phone").textValue();
-        int companyId = Integer.parseInt(node.get("companyId").textValue());
-
-        HR hr = new HR(firstName, lastName, phone, companyId);
+        boolean check;
 
         try {
-            DBHRQueryHandler.getInstance().addEntity(hr);
+            check = DBHRQueryHandler.getInstance().addEntity(node);
         } catch (SQLException e) {
             e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
-        return Response.ok("{\"Status\" : \"OK\"}").build();
+        if (check) {
+            return Response.ok("{\"Status\" : \"OK\"}").build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Unable to add the new HR!!!\"").build();
+        }
     }
 
     /**
@@ -94,8 +94,8 @@ public class HRService {
 
     /**
      * Searches for HR in the database by provided first and last name. If such are not provided the default
-     * action is to query the database for all HR entered so far.
-     * @return the HR searched for or all HR entered into the database so far.
+     * action is to query the database for all HRs entered so far.
+     * @return the HR searched for or all HRs entered into the database so far.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -120,45 +120,32 @@ public class HRService {
 
     /**
      * Edits the details of the selected HR.
-     * @param hrId the ID of the HR.
+     * @param hrID the ID of the HR to be edited.
      * @param hrDetails the new details which should be set in the database.
      * @return the response from the database (either successful or failed modification).
      */
     @POST
-    @Path("{id}")
+    @Path("{hrID}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response editHR(@PathParam("id") String hrId, JsonNode hrDetails) {
+    public Response editHR(@PathParam("hrID") String hrID, JsonNode hrDetails) {
         System.out.println("POST /hrs edit");
 
+        int hrId = Integer.parseInt(hrID);
+
         try {
-            int id = Integer.parseInt(hrId);
-            Entity entity = DBHRQueryHandler.getInstance().searchEntityById(id);
-            HR hr = null;
+            boolean check = DBHRQueryHandler.getInstance().updateEntity(hrId, hrDetails);
 
-            if (entity instanceof HR) {
-                hr = (HR) entity;
-            }
-
-            if (hr != null) {
-                HR newHR = new HR();
-                newHR.setId(id);
-                newHR.setFirstName(hrDetails.get("firstName").textValue());
-                newHR.setLastName(hrDetails.get("lastName").textValue());
-                newHR.setPhone(hrDetails.get("phone").textValue());
-                newHR.setCompanyId(Integer.parseInt(hrDetails.get("companyId").textValue()));
-
-                DBHRQueryHandler.getInstance().updateEntity(newHR);
-
-                return Response.ok("{\"Status\" : \"HR with ID " + id + " was successfully modified!\"}").build();
+            if (check) {
+                return Response.ok("{\"Status\" : \"HR with ID " + hrId + " was successfully modified!\"}").build();
             } else {
-                return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"HR with ID " + id + " does not exists\"}").build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"HR with ID " + hrId + " does not exists\"}").build();
             }
         } catch (NumberFormatException exception) {
             exception.printStackTrace();
             return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Invalid ID format!!!\"}").build();
         } catch (SQLException e) {
             e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"Error\" : \"HR with ID" + hrId + " was not modified\"}").build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"Error\" : \"HR with ID " + hrId + " was not modified\"}").build();
         }
     }
 }

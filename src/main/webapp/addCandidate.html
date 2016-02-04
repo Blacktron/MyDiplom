@@ -12,7 +12,7 @@
 			var lang3 = $('#language3').val();
 
 			var user = {
-				firstName : firstName,
+				firName : firstName,
 				lastName : lastName,
 				age : years,
 				language1 : lang1,
@@ -23,11 +23,11 @@
 			console.log(user);
 
 			$.ajax({
-				url: '/rest/cand/addCandidate',
 				method: 'POST',
-                dataType: 'json',
-                contentType: "application/json; charset=utf-8",
+				url: '/hello/addCandidate',
+				dataType: 'json',
 				data: JSON.stringify(user),
+				contentType: "application/json; charset=utf-8",
 				success: function() {
 					alert("Operation completed successfully");
 				},
@@ -43,22 +43,22 @@
 <body>
 	<form method="POST">
 		<label for="fname">First Name:</label>
-		<input type="text" companyName="fname" id="fname" autofocus="autofocus"> <br />
+		<input type="text" name="fname" id="fname" autofocus="autofocus"> <br />
 
 		<label for="lname">Last Name:</label>
-		<input type="text" companyName="lname" id="lname"> <br />
+		<input type="text" name="lname" id="lname"> <br />
 
 		<label for="age">Age:</label>
-		<input type="text" companyName="age" id="age"> <br />
+		<input type="text" name="age" id="age"> <br />
 
 		<label for="language1">Language 1:</label>
-		<input type="text" companyName="language1" id="language1"> <br />
+		<input type="text" name="language1" id="language1"> <br />
 
 		<label for="language2">Language 2:</label>
-		<input type="text" companyName="language2" id="language2"> <br />
+		<input type="text" name="language2" id="language2"> <br />
 
 		<label for="language3">Language 3:</label>
-		<input type="text" companyName="language3" id="language3"> <br />
+		<input type="text" name="language3" id="language3"> <br />
 
 		<input type="button" value="Add New User" onclick="addUser()" />
 	</form>

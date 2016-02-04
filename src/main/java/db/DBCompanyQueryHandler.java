@@ -1,13 +1,12 @@
 package db;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import models.Entity;
 import models.EntityDbHandler;
 import models.implementation.Company;
 import utils.DBUtils;
 
 import javax.ws.rs.core.MultivaluedMap;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -30,101 +29,48 @@ public class DBCompanyQueryHandler implements EntityDbHandler {
     }
 
     /**
-     * Returns a list of all companies currently entered in the database.
-     * @return the list of all companies.
+     * Returns a list of all Companies currently entered in the database.
+     * @return the list of all Companies.
      * @throws SQLException
      */
     public List<Entity> getAllEntities() throws SQLException {
-        String query = "SELECT * FROM companies";
+        String query = "SELECT * FROM company";
         return DBUtils.execQueryAndBuildResult(query, null, this);
-
-//        Connection connection = null;
-//        PreparedStatement statement = null;
-//        ResultSet resultSet = null;
-//
-//        try {
-//            connection = DBConnectionHandler.openDatabaseConnection();
-//            List<Entity> allCompanies;
-//
-//
-//
-//            if (connection != null) {
-//                statement = connection.prepareStatement(query);
-//                resultSet = statement.executeQuery();
-//            }
-//
-//            allCompanies = buildResult(resultSet);
-//
-//            return allCompanies;
-//        } finally {
-//            if (statement != null) {
-//                statement.close();
-//            }
-//
-//            if (resultSet != null) {
-//                resultSet.close();
-//            }
-//
-//            if (connection != null) {
-//                connection.close();
-//            }
-//        }
     }
 
     /**
-     * Adds a new company to the database.
-     * @param entity the entity holding the information to create a new entry in the database.
+     * Adds a new Company to the database.
+     * @param node the JSON object holding the data of the Company.
      * @throws SQLException
      */
-    public boolean addEntity(Entity entity) throws SQLException {
+    public boolean addEntity(JsonNode node) throws SQLException {
         boolean check = false;
-        Connection connection = null;
-        PreparedStatement statement = null;
-        Company company = null;
+        Company company = new Company(node);
 
-        // Open a connection with the database and execute the query.
-        try {
-            // Check if the entity is a Company and cast it.
-            if (entity instanceof Company) {
-                company = (Company) entity;
-            }
+        // Check if such Company exists in the database.
+        String companyName = company.getCompanyName();
+        String companyExistsQuery = "SELECT companyId FROM company WHERE companyName = ?";
+        boolean companyExists = DBUtils.isParamExists(companyName, companyExistsQuery);
 
-            connection = DBConnectionHandler.openDatabaseConnection();
-
-            // Prepare the query and execute it.
-            assert company != null;
-            String companyName = company.getCompanyName();
-
-            String query = "INSERT INTO companies(name) VALUES(?)";
-
-            if (connection != null) {
-                statement = connection.prepareStatement(query);
-                statement.setString(1, companyName);
-
-                statement.execute();
-                check = true;
-            }
-        } finally {
-            if (statement != null) {
-                statement.close();
-            }
-
-            if (connection != null) {
-                connection.close();
-            }
+        // If there is no such Technology in the database, prepare the query and execute it.
+        if (!companyExists) {
+            String query = "INSERT INTO company(companyName) VALUES(?)";
+            Object[] params = {companyName};
+            DBUtils.execQuery(query, params);
+            check = true;
         }
 
         return check;
     }
 
     /**
-     * Deletes a selected company from the database.
-     * @param companyId the id of the company to be removed.
+     * Deletes a selected Company from the database.
+     * @param companyId the ID of the Company to be removed.
      * @throws SQLException
      */
     public void deleteEntity(int companyId) throws SQLException {
         Object[] params = {companyId};
-        String query = "DELETE FROM companies WHERE companyId = ?";
+        String query = "DELETE FROM company WHERE companyId = ?";
         DBUtils.execQuery(query, params);
     }
 
@@ -139,8 +85,8 @@ public class DBCompanyQueryHandler implements EntityDbHandler {
         List<Entity> result = null;
 
         // Check which parameters exist in the query.
-        if (data.containsKey("name")) {
-            companyName = data.getFirst("name");
+        if (data.containsKey("companyName")) {
+            companyName = data.getFirst("companyName");
         }
 
         if (companyName == null || companyName.equals("")) {
@@ -154,14 +100,14 @@ public class DBCompanyQueryHandler implements EntityDbHandler {
     }
 
     /**
-     * Search if company with the specified ID exists in the database.
-     * @param companyId the ID of the company to be searched.
-     * @return the candidate as object.
+     * Search if Company with the specified ID exists in the database.
+     * @param companyId the ID of the Company to be searched.
+     * @return the Company as object.
      * @throws SQLException
      */
     public Entity searchEntityById(int companyId) throws SQLException {
         Object[] params = {companyId};
-        String query = "SELECT * FROM companies WHERE companyId = ?";
+        String query = "SELECT * FROM company WHERE companyId = ?";
         List<Entity> result = DBUtils.execQueryAndBuildResult(query, params, this);
 
         if (result != null && result.size() > 0) {
@@ -173,64 +119,49 @@ public class DBCompanyQueryHandler implements EntityDbHandler {
     }
 
     /**
-     * Search company by name if exists in the database.
-     * @param name the name of the company to search for.
-     * @return the company as object.
+     * Search Company by name if exists in the database.
+     * @param name the name of the Company to search for.
+     * @return the Company as object.
      * @throws SQLException
      */
     private List<Entity> searchCompanyByName(String name) throws SQLException {
         Object[] params = {name};
-        String query = "SELECT * FROM companies WHERE name LIKE ?";
+        String query = "SELECT * FROM company WHERE companyName LIKE ?";
         return DBUtils.execQueryAndBuildResult(query, params, this);
     }
 
     /**
-     * Update a company entry in the database with provided details.
-     * @param entity the details of the company which to be used for the modification.
+     * Update a Company entry in the database with provided details.
+     * @param companyId the ID of the Company to be edited.
+     * @param node the details of the Company which to be used for the modification.
      * @return true if the modification is successful, false otherwise.
      * @throws SQLException
      */
-    public boolean updateEntity(Entity entity) throws SQLException {
+    public boolean updateEntity(int companyId, JsonNode node) throws SQLException {
         boolean check = false;
 
-        Connection connection = null;
-        PreparedStatement statement = null;
-        Company company = null;
+        String operation = node.get("operations").textValue();
+        String query;
+        Object[] params;
 
-        // Open a connection with the database, prepare a List which will hold the result and execute the query.
-        try {
-            if (entity instanceof Company) {
-                company = (Company) entity;
+        // If we want to edit the name of a Technology.
+        if (operation.equalsIgnoreCase("modifyCompany")) {
+            // Check if such Company exists in the database.
+            String companyExistsQuery = "SELECT companyId FROM company WHERE companyId = ?";
+            boolean companyExists = DBUtils.isParamExists(companyId, companyExistsQuery);
+
+            // Update the Technology.
+            if (companyExists) {
+                String companyName = node.get("companyName").textValue();
+                query = "UPDATE company SET companyName = ? WHERE companyId = ?";
+                params = new Object[]{companyName, companyId};
+                DBUtils.execQuery(query, params);
             }
 
-            connection = DBConnectionHandler.openDatabaseConnection();
-
-            assert company != null;
-            int id = company.getId();
-            String companyName = company.getCompanyName();
-
-            String query = "UPDATE companies SET name = ? WHERE companyId = ?";
-
-            if (connection != null) {
-                statement = connection.prepareStatement(query);
-
-                statement.setString(1, companyName);
-                statement.setInt(2, id);
-
-                statement.executeUpdate();
-                check = true;
-            }
-
-            return check;
-        } finally {
-            if (statement != null) {
-                statement.close();
-            }
-
-            if (connection != null) {
-                connection.close();
-            }
+            check = true;
         }
+
+        return check;
     }
 
     /**
@@ -245,7 +176,7 @@ public class DBCompanyQueryHandler implements EntityDbHandler {
             try {
                 while (resultSet.next()) {
                     int id = resultSet.getInt("companyId");
-                    String companyName = resultSet.getString("name");
+                    String companyName = resultSet.getString("companyName");
 
                     Company company = new Company(id, companyName);
                     data.add(company);

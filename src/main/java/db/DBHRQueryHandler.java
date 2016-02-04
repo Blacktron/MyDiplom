@@ -1,17 +1,18 @@
 package db;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import models.Entity;
 import models.EntityDbHandler;
 import models.implementation.HR;
 import utils.DBUtils;
 
 import javax.ws.rs.core.MultivaluedMap;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @Created by Terrax on 09-Dec-2015.
@@ -31,62 +32,40 @@ public class DBHRQueryHandler implements EntityDbHandler {
 
     /**
      * Returns a list of all HRs currently entered in the database.
-     * @return the list of all candidates.
+     * @return the list of all HRs.
      * @throws SQLException
      */
     public List<Entity> getAllEntities() throws SQLException {
-        String query = "SELECT * FROM hr";
+        String query = "SELECT hr.hrId, hr.hrFirstName, hr.hrLastName, company.companyName, hr.phone FROM hr, company WHERE hr.companyId = company.companyId ORDER BY company.companyName, hr.hrFirstName, hr.hrLastName";
         return DBUtils.execQueryAndBuildResult(query, null, this);
     }
 
     /**
      * Adds a new HR to the database.
-     * @param entity the entity holding the information to create a new entry in the database.
+     * @param node the JSON object holding the data of the HR.
      * @throws SQLException
      */
-    public boolean addEntity(Entity entity) throws SQLException {
+    public boolean addEntity(JsonNode node) throws SQLException {
+        // TODO: Search if such HR already exists in the database by email after the email property is implemented in the Entity.
         boolean check = false;
-        Connection connection = null;
-        PreparedStatement statement = null;
-        HR hr = null;
+        HR hr = new HR(node);
 
-        // Open a connection with the database and execute the query.
-        try {
-            // Check if the entity is a Candidate and cast it.
-            if (entity instanceof HR) {
-                hr = (HR) entity;
-            }
+        // Prepare the query and execute it.
+        String hrFirstName = hr.getHrFirstName();
+        String hrLastName = hr.getHrLastName();
+        String phone = hr.getPhone();
+        int companyId = hr.getCompanyId();
 
-            connection = DBConnectionHandler.openDatabaseConnection();
+        // Check if such Company already exists in the database.
+        String companyExistsQuery = "SELECT companyId FROM company WHERE companyId = ?";
+        boolean companyExists = DBUtils.isParamExists(companyId, companyExistsQuery);
 
-            // Prepare the query and execute it.
-            assert hr != null;
-            String fname = hr.getFirstName();
-            String lname = hr.getLastName();
-            String phone = hr.getPhone();
-            int companyId = hr.getCompanyId();
-
-            String query = "INSERT INTO hr(firstName, lastName, phone, companyId) VALUES(?, ?, ?, ?)";
-
-            if (connection != null) {
-                statement = connection.prepareStatement(query);
-
-                statement.setString(1, fname);
-                statement.setString(2, lname);
-                statement.setString(3, phone);
-                statement.setInt(4, companyId);
-
-                statement.execute();
-                check = true;
-            }
-        } finally {
-            if (statement != null) {
-                statement.close();
-            }
-
-            if (connection != null) {
-                connection.close();
-            }
+        // If there is such Company in the database, prepare the query and execute it.
+        if (companyExists) {
+            String query = "INSERT INTO hr(companyId, hrFirstName, hrLastName, phone) VALUES(?, ?, ?, ?)";
+            Object[] params = {companyId, hrFirstName, hrLastName, phone};
+            DBUtils.execQuery(query, params);
+            check = true;
         }
 
         return check;
@@ -110,28 +89,29 @@ public class DBHRQueryHandler implements EntityDbHandler {
      * @throws SQLException
      */
     public List<Entity> searchEntity(MultivaluedMap<String, String> data) throws SQLException {
-        String firstName = "";
-        String lastName = "";
+        int searchParametersCount = data.size();
         List<Entity> result;
 
-        // Check which parameters exist in the query.
-        if (data.containsKey("fName")) {
-            firstName = data.getFirst("fName");
-        }
-
-        if (data.containsKey("lName")) {
-            lastName = data.getFirst("lName");
-        }
-
         // Make the proper database query based on the existing query parameter.
-        if ((firstName == null || firstName.equals("")) && (lastName == null || lastName.equals(""))) {
+        if (searchParametersCount == 0) {
+            // If there are no parameters provided - show all entries in the database.
             result = this.getAllEntities();
         }
-        else if (firstName != null & (lastName == null || lastName.equals(""))) {
-            result = this.searchHRByName(firstName);
-        }
         else {
-            result = this.searchHRByName(firstName, lastName);
+            /*
+                Make a Map holding the keys and their corresponding values.
+                Pass the Map as parameter to a method which dynamically builds a query based on the
+                existing parameters.
+             */
+            Map<String, String> parameters = new HashMap<String, String>();
+
+            for (String key : data.keySet()) {
+                String value = data.getFirst(key);
+                //System.out.println(key + " " + value);
+                parameters.put(key, value);
+            }
+
+            result = this.searchHRByParams(parameters);
         }
 
         return result;
@@ -145,7 +125,7 @@ public class DBHRQueryHandler implements EntityDbHandler {
      */
     public Entity searchEntityById(int hrId) throws SQLException {
         Object[] params = {hrId};
-        String query = "SELECT * FROM hr WHERE hrId = ?";
+        String query = "SELECT hr.hrId, hr.hrFirstName, hr.hrLastName, hr.phone, company.companyName FROM hr, company WHERE hrId = ? AND hr.companyId = company.companyId GROUP BY hr.hrId ORDER BY hr.hrFirstName, hr.hrLastName";
         List<Entity> result = DBUtils.execQueryAndBuildResult(query, params, this);
 
         if (result != null && result.size() > 0) {
@@ -157,110 +137,110 @@ public class DBHRQueryHandler implements EntityDbHandler {
     }
 
     /**
-     * Search by either first or last name if HR exists in the database.
-     * @param name the name of the HR to search for.
-     * @return the HR as object.
+     * Method which searches for entries based on the provided parameters.
+     * @param parameters the parameters to search for.
+     * @return a List holding the result of the search.
      * @throws SQLException
      */
-    private List<Entity> searchHRByName(String name) throws SQLException {
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
+    public List<Entity> searchHRByParams(Map<String, String> parameters) throws SQLException {
 
-        // Open a connection with the database, prepare a List which will hold the result and execute the query.
-        try {
-            List<Entity> found;
-            connection = DBConnectionHandler.openDatabaseConnection();
-            String query = "SELECT * FROM hr WHERE firstName LIKE ? OR lastName LIKE ?";
+        String query = "SELECT hr.hrId, hr.hrFirstName, hr.hrLastName, hr.phone, company.companyId, company.companyName FROM hr INNER JOIN company ON hr.companyId = company.companyId";
+        int count = 0;                                                  // Used to build the array holding the parameters for query execution.
+        Object[] params = new Object[parameters.size()];                // Array of objects holding the parameters for the query execution.
+        Set<String> keys = parameters.keySet();                         // Set holding the keys of the Map used to iterate through it and build the array.
+        String fullQuery = DBUtils.buildQuery(parameters, query);       // The query which to be used when execute request to the database.
+        fullQuery += " ORDER BY hr.hrFirstName, hr.hrLastName";
 
-            if (connection != null) {
-                statement = connection.prepareStatement(query);
+        System.out.println("FULL QUERY: " + fullQuery);
 
-                statement.setString(1, "%" + name + "%");
-                statement.setString(2, "%" + name + "%");
-
-                resultSet = statement.executeQuery();
-            }
-
-            found = this.buildResult(resultSet);
-
-            return found;
-        } finally {
-            if (statement != null) {
-                statement.close();
-            }
-
-            if (connection != null) {
-                connection.close();
-            }
+        for (String key : keys) {
+            params[count] = parameters.get(key);
+            count++;
         }
-    }
 
-    /**
-     * Search if HR exists in the database by both first and last names.
-     * @param fName the first name of the HR to search for.
-     * @param lName the last name of the HR to search for.
-     * @return the HR as object.
-     * @throws SQLException
-     */
-    private List<Entity> searchHRByName(String fName, String lName) throws SQLException {
-        Object[] params = {fName, lName};
-        String query = "SELECT * FROM hr WHERE firstName = ? AND lastName = ?";
-        return DBUtils.execQueryAndBuildResult(query, params, this);
+        return DBUtils.execQueryAndBuildResult(fullQuery, params, this);
     }
 
     /**
      * Update a HR entry in the database with provided details.
-     * @param entity the details of the HR which to be used for the modification.
+     * @param hrId the ID of the HR to be edited.
+     * @param node the details of the HR which to be used for the modification.
      * @return true if the modification is successful, false otherwise.
      * @throws SQLException
      */
-    public boolean updateEntity(Entity entity) throws SQLException {
+    public boolean updateEntity(int hrId, JsonNode node) throws SQLException {
         boolean check = false;
-        Connection connection = null;
-        PreparedStatement statement = null;
-        HR hr = null;
 
-        // Open a connection with the database, prepare a List which will hold the result and execute the query.
+        String operation;       // The operation which has to take place.
+        String query;           // The query which to be executed.
+        Object[] params;        // Array of Objects holding the parameters used for the update.
+
         try {
-            if (entity instanceof HR) {
-                hr = (HR) entity;
+            JsonNode operations = new ObjectMapper().readTree(String.valueOf(node)).get("operations");
+            System.out.println(operations.toString());
+
+            if (operations.isArray()) {
+                for (JsonNode action : operations) {
+                    operation = action.toString().replaceAll("\"", "");
+                    System.out.println("OPERATION: " + operation);
+
+                    // If we want to modify the Company ID which the HR is working for.
+                    if (operation.equalsIgnoreCase("modifyCompany")) {
+                        // Check if the Company exists in the database.
+                        int companyId = Integer.parseInt(node.get("companyId").textValue());
+                        String companyExistsQuery = "SELECT companyId FROM company WHERE companyId = ?";
+                        boolean companyExists = DBUtils.isParamExists(companyId, companyExistsQuery);
+
+                        // Modify the Company.
+                        if (companyExists) {
+                            System.out.println("COMPANY EXISTS");
+                            query = "UPDATE hr SET companyId = ? WHERE hrId = ?";
+                            params = new Object[]{companyId, hrId};
+                            DBUtils.execQuery(query, params);
+                            check = true;
+                        }
+                    }
+
+                    // If we want to modify the name(s) of the HR.
+                    if (operation.equalsIgnoreCase("modifyName")) {
+                        if (node.has("hrFirstName") && node.has("hrLastName")) {
+                            String hrFirstName = node.get("hrFirstName").textValue();
+                            String hrLastName = node.get("hrLastName").textValue();
+                            query = "UPDATE hr SET hrFirstName = ?, hrLastName = ? WHERE hrId = ?";
+                            params = new Object[]{hrFirstName, hrLastName, hrId};
+                            DBUtils.execQuery(query, params);
+                        } else if (node.has("hrFirstName")) {
+                            String hrFirstName = node.get("hrFirstName").textValue();
+                            query = "UPDATE hr SET hrFirstName = ? WHERE hrId = ?";
+                            params = new Object[]{hrFirstName, hrId};
+                            DBUtils.execQuery(query, params);
+                        } else if (node.has("hrLastName")) {
+                            String hrLastName = node.get("hrLastName").textValue();
+                            query = "UPDATE hr SET hrLastName = ? WHERE hrId = ?";
+                            params = new Object[]{hrLastName, hrId};
+                            DBUtils.execQuery(query, params);
+                        }
+
+                        check = true;
+                    }
+
+                    // If we want to modify the phone of the HR.
+                    if (operation.equalsIgnoreCase("modifyPhone")) {
+                        String phone = node.get("phone").textValue();
+                        query = "UPDATE hr SET phone = ? WHERE hrId = ?";
+                        params = new Object[]{phone, hrId};
+                        DBUtils.execQuery(query, params);
+                        check = true;
+                    }
+                }
             }
-
-            connection = DBConnectionHandler.openDatabaseConnection();
-
-            assert hr != null;
-            int id = hr.getId();
-            String fname = hr.getFirstName();
-            String lname = hr.getLastName();
-            String phone = hr.getPhone();
-            int companyId = hr.getCompanyId();
-
-            String query = "UPDATE hr SET firstName = ?, lastName = ?, phone = ?, companyId = ? WHERE hrId = ?";
-
-            if (connection != null) {
-                statement = connection.prepareStatement(query);
-
-                statement.setString(1, fname);
-                statement.setString(2, lname);
-                statement.setString(3, phone);
-                statement.setInt(4, companyId);
-                statement.setInt(5, id);
-
-                statement.executeUpdate();
-                check = true;
-            }
-
-            return check;
-        } finally {
-            if (statement != null) {
-                statement.close();
-            }
-
-            if (connection != null) {
-                connection.close();
-            }
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+        return check;
     }
 
     /**
@@ -274,13 +254,14 @@ public class DBHRQueryHandler implements EntityDbHandler {
         if (resultSet != null) {
             try {
                 while (resultSet.next()) {
-                    int id = resultSet.getInt("hrId");
-                    String firstName = resultSet.getString("firstName");
-                    String lastName = resultSet.getString("lastName");
-                    String phone = resultSet.getString("phone");
-                    int companyId = resultSet.getInt("companyId");
+                    int hrId = resultSet.getInt("hrId");                        // The ID of the HR.
+                    String hrFirstName = resultSet.getString("hrFirstName");    // The first name of the HR.
+                    String hrLastName = resultSet.getString("hrLastName");      // The last name of the HR.
+                    String phone = resultSet.getString("phone");                // The phone of the HR.
+                    String companyName = resultSet.getString("companyName");    // The name of the Company which the HR is working for.
 
-                    HR hr = new HR(id, firstName, lastName, phone, companyId);
+                    // Create the HR object, and put it into the List.
+                    HR hr = new HR(hrId, hrFirstName, hrLastName, phone, companyName);
                     data.add(hr);
                 }
             } catch (SQLException e) {

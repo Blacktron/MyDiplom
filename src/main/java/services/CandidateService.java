@@ -2,7 +2,6 @@ package services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import models.Entity;
-import models.implementation.Candidate;
 import db.DBCandidateQueryHandler;
 
 import javax.ws.rs.*;
@@ -18,19 +17,19 @@ import java.util.List;
 public class CandidateService {
 
     /**
-     * A method which searches for a candidate using ID as criteria.
-     * @param candId the ID which to be searched.
-     * @return the candidate if such is found.
+     * A method which searches for a Candidate using ID as criteria.
+     * @param candidateId the ID which to be searched.
+     * @return the Candidate if such is found.
      */
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getCandidateById(@PathParam("id") String candId) {
+    public Response getCandidateById(@PathParam("id") String candidateId) {
         System.out.println("GET /candidates get");
         Entity candidate;
 
         try {
-            int id = Integer.parseInt(candId);
+            int id = Integer.parseInt(candidateId);
             candidate = DBCandidateQueryHandler.getInstance().searchEntityById(id);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -44,8 +43,8 @@ public class CandidateService {
     }
 
     /**
-     * Create a new candidate and insert it into the database.
-     * @param node the details from which the candidate will be created.
+     * Receives the details of the entry and sends them for processing.
+     * @param node the details from which the Candidate will be created.
      * @return the response from the database (either successful or failed creation).
      */
     @POST
@@ -54,40 +53,38 @@ public class CandidateService {
     public Response addCandidate(JsonNode node) {
         System.out.println("POST /candidates add");
 
-        String firstName = node.get("firstName").textValue();
-        String lastName = node.get("lastName").textValue();
-        int age = Integer.parseInt(node.get("age").textValue());
-        String language1 = node.get("language1").textValue();
-        String language2 = node.get("language2").textValue();
-        String language3 = node.get("language3").textValue();
-
-        Candidate candidate = new Candidate(firstName, lastName, age, language1, language2, language3);
+        boolean check;
 
         try {
-            DBCandidateQueryHandler.getInstance().addEntity(candidate);
+            check = DBCandidateQueryHandler.getInstance().addEntity(node);
         } catch (SQLException e) {
             e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
-        return Response.ok("{\"Status\" : \"OK\"}").build();
+        if (check) {
+            return Response.ok("{\"Status\" : \"OK\"}").build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Unable to add the new Candidate!!!\"").build();
+        }
     }
 
     /**
-     * Deletes a candidate from the database.
-     * @param candId the ID of the candidate to be deleted.
+     * Deletes a Candidate from the database.
+     * @param candidateId the ID of the Candidate to be deleted.
      * @return the response from the database (either successful or failed deletion).
      */
     @DELETE
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteCandidate(@PathParam("id") String candId) {
+    public Response deleteCandidate(@PathParam("id") String candidateId) {
         System.out.println("DELETE /candidates delete");
 
         try {
-            int id = Integer.parseInt(candId);
+            int id = Integer.parseInt(candidateId);
             DBCandidateQueryHandler.getInstance().deleteEntity(id);
         } catch (NumberFormatException exception) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Invalid ID format\"").build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Invalid ID format!!!\"").build();
         } catch (SQLException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
@@ -96,9 +93,9 @@ public class CandidateService {
     }
 
     /**
-     * Searches for candidates in the database by provided first and last name. If such are not provided the default
-     * action is to query the database for all candidates entered so far.
-     * @return the candidate searched for or all candidates entered into the database so far.
+     * Searches for Candidates in the database by provided first and last name. If such are not provided the default
+     * action is to query the database for all Candidates entered so far.
+     * @return the Candidate searched for or all Candidates entered into the database so far.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -122,48 +119,33 @@ public class CandidateService {
     }
 
     /**
-     * Edits the details of the selected candidate.
-     * @param candId the ID of the candidate.
+     * Edits the details of the selected Candidate.
+     * @param candId the ID of the Candidate to be edited.
      * @param candidateDetails the new details which should be set in the database.
      * @return the response from the database (either successful or failed modification).
      */
     @POST
-    @Path("{id}")
+    @Path("{candId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response editCandidate(@PathParam("id") String candId, JsonNode candidateDetails) {
+    public Response editCandidate(@PathParam("candId") String candId, JsonNode candidateDetails) {
         System.out.println("POST /candidates edit");
 
+        int candidateId = Integer.parseInt(candId);
+
         try {
-            int id = Integer.parseInt(candId);
-            Entity entity = DBCandidateQueryHandler.getInstance().searchEntityById(id);
-            Candidate candidate = null;
+            boolean check = DBCandidateQueryHandler.getInstance().updateEntity(candidateId, candidateDetails);
 
-            if (entity instanceof Candidate) {
-                candidate = (Candidate) entity;
-            }
-
-            if (candidate != null) {
-                Candidate newCandidate = new Candidate();
-                newCandidate.setId(id);
-                newCandidate.setFirstName(candidateDetails.get("firstName").textValue());
-                newCandidate.setLastName(candidateDetails.get("lastName").textValue());
-                newCandidate.setAge(Integer.parseInt(candidateDetails.get("age").textValue()));
-                newCandidate.setLanguage1(candidateDetails.get("language1").textValue());
-                newCandidate.setLanguage2(candidateDetails.get("language2").textValue());
-                newCandidate.setLanguage3(candidateDetails.get("language3").textValue());
-
-                DBCandidateQueryHandler.getInstance().updateEntity(newCandidate);
-
-                return Response.ok("{\"Status\" : \"Candidate with ID " + id + " was successfully modified!\"}").build();
+            if (check) {
+                return Response.ok("{\"Status\" : \"Candidate with ID " + candidateId + " was successfully modified!\"}").build();
             } else {
-                return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Candidate with ID " + id + " does not exists\"}").build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Candidate with ID " + candidateId + " does not exists\"}").build();
             }
         } catch (NumberFormatException exception) {
             exception.printStackTrace();
             return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Invalid ID format!!!\"}").build();
         } catch (SQLException e) {
             e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"Error\" : \"Candidate with ID" + candId + " was not modified\"}").build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"Error\" : \"Candidate with ID " + candidateId + " was not modified\"}").build();
         }
     }
 }

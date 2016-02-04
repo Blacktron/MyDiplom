@@ -2,7 +2,6 @@ package services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import models.Entity;
-import models.implementation.Technology;
 import db.DBTechnologyQueryHandler;
 
 import javax.ws.rs.*;
@@ -18,19 +17,19 @@ import java.util.List;
 public class TechnologyService {
 
     /**
-     * A method which searches for a technology using ID as criteria.
-     * @param techId the ID which to be searched.
+     * A method which searches for a Technology using ID as criteria.
+     * @param technologyId the ID which to be searched.
      * @return the technology if such is found.
      */
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getTechnologyById(@PathParam("id") String techId) {
+    public Response getTechnologyById(@PathParam("id") String technologyId) {
         System.out.println("GET /technologies get");
         Entity technology;
 
         try {
-            int id = Integer.parseInt(techId);
+            int id = Integer.parseInt(technologyId);
             technology = DBTechnologyQueryHandler.getInstance().searchEntityById(id);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -43,71 +42,60 @@ public class TechnologyService {
         return Response.ok(technology).build();
     }
 
-//    /**
-//     * This method is for internal use only.
-//     * It queries the database for all entries in the tech table.
-//     * @return all technologies currently existing in the database.
-//     */
-//    @Produces(MediaType.APPLICATION_JSON)
-//    private Response getAllTechnologies() {
-//        try {
-//            List<Technology> technologies = DBTechnologyQueryHandler.getAllTechnologies();
-//            return Response.ok(technologies).build();
-//        }
-//        catch (TechnologyException exception) {
-//            return Response.status(Response.Status.BAD_REQUEST).entity(exception.getMessage()).build();
-//        }
-//        catch (SQLException e) {
-//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-//        }
-//    }
-
     /**
-     * /**
-     * Create a new technology and insert it into the database.
-     * @param techName the name which will be used to create the new technology.
+     * Create a new Technology and insert it into the database.
+     * @param node the details from which the Technology will be created..
      * @return the response from the database (either successful or failed creation).
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response addTechnology(JsonNode techName) throws SQLException {
+    public Response addTechnology(JsonNode node) throws SQLException {
         System.out.println("POST /technologies add");
 
-        String tech = techName.get("name").textValue();
-        Technology technology = new Technology(tech);
+        boolean check;
 
-        DBTechnologyQueryHandler.getInstance().addEntity(technology);
+        try {
+            check = DBTechnologyQueryHandler.getInstance().addEntity(node);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        }
 
-        return Response.ok("{\"Status\" : \"OK\"}").build();
+        if (check) {
+            return Response.ok("{\"Status\" : \"OK\"}").build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Such Technology already exists!!!\"}").build();
+        }
     }
 
     /**
-     * Deletes a technology from the database.
-     * @param techId the ID of the technology to be deleted.
+     * Deletes a Technology from the database.
+     * @param technologyId the ID of the Technology to be deleted.
      * @return the response from the database (either successful or failed deletion).
      */
     @DELETE
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteTechnology(@PathParam("id") String techId) throws SQLException {
+    public Response deleteTechnology(@PathParam("id") String technologyId) throws SQLException {
         System.out.println("DELETE /technologies delete");
 
         try {
-            int id = Integer.parseInt(techId);
+            int id = Integer.parseInt(technologyId);
             DBTechnologyQueryHandler.getInstance().deleteEntity(id);
-            return Response.ok("{\"Status\" : \"OK\"}").build();
         } catch (NumberFormatException exception) {
             return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Invalid ID format!!!\"}").build();
         } catch (SQLException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
+
+        return Response.ok("{\"Status\" : \"OK\"}").build();
     }
 
     /**
-     * Searches for technology in the database by provided name. If such is not provided the default
-     * action is to query the database for all technologies entered so far.
-     * @return the technology searched for or all technologies entered into the database so far.
+     * Searches for Technology in the database by provided name. If such is not provided the default
+     * action is to query the database for all Technologies entered so far.
+     * @return the Technology searched for or all Technologies entered into the database so far.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -131,42 +119,33 @@ public class TechnologyService {
     }
 
     /**
-     * Edits the details of the selected technology.
-     * @param techId the ID of the technology.
+     * Edits the details of the selected Technology.
+     * @param techId the ID of the Technology to be edited.
      * @param technologyDetails the new details which should be set in the database.
      * @return the response from the database (either successful or failed modification).
      */
     @POST
-    @Path("{id}")
+    @Path("{techId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response editTechnology(@PathParam("id") String techId, JsonNode technologyDetails) {
+    public Response editTechnology(@PathParam("techId") String techId, JsonNode technologyDetails) {
         System.out.println("POST /technologies edit");
 
+        int technologyId = Integer.parseInt(techId);
+
         try {
-            int id = Integer.parseInt(techId);
-            Entity entity = DBTechnologyQueryHandler.getInstance().searchEntityById(id);
-            Technology technology = null;
+            boolean check = DBTechnologyQueryHandler.getInstance().updateEntity(technologyId, technologyDetails);
 
-            if (entity instanceof Technology) {
-                technology = (Technology) entity;
-            }
-
-            if (technology != null) {
-                Technology newTechnology = new Technology();
-                newTechnology.setId(id);
-                newTechnology.setName(technologyDetails.get("name").textValue());
-
-                DBTechnologyQueryHandler.getInstance().updateEntity(newTechnology);
-                return Response.ok("{\"Status\" : \"Technology with ID " + id + " was successfully modified!\"}").build();
+            if (check) {
+                return Response.ok("{\"Status\" : \"Technology with ID " + technologyId + " was successfully modified!\"}").build();
             } else {
-                return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Technology with ID " + id + " does not exists\"}").build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Technology with ID " + technologyId + " does not exists\"}").build();
             }
         } catch (NumberFormatException exception) {
             exception.printStackTrace();
             return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Invalid ID format!!!\"}").build();
         } catch (SQLException e) {
             e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"Error\" : \"Technology with ID" + techId + " was not modified\"}").build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"Error\" : \"Technology with ID " + technologyId + " was not modified\"}").build();
         }
     }
 }

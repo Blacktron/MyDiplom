@@ -6,7 +6,7 @@
   <artifactId>MyDiplom</artifactId>
   <packaging>war</packaging>
   <version>1.0-SNAPSHOT</version>
-  <companyName>MyDiplom Maven Webapp</companyName>
+  <name>MyDiplom Maven Webapp</name>
   <url>http://maven.apache.org</url>
 
   <properties>
