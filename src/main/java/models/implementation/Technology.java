@@ -58,7 +58,7 @@ public class Technology extends Entity {
     public String toString() {
         return "Technology{" +
                 "id='" + id + '\'' +
-                "technologyName='" + technologyName + '\'' +
+                "technologyName='" + technologyName +
                 '}';
     }
 }

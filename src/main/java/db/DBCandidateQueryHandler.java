@@ -37,7 +37,7 @@ public class DBCandidateQueryHandler implements EntityDbHandler {
      * @throws SQLException
      */
     public List<Entity> getAllEntities() throws SQLException {
-        String query = "SELECT candidate.candidateId, candidate.candidateFirstName, candidate.candidateLastName, candidate.age, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', experience.years ORDER BY experience.years SEPARATOR ',') AS 'Experience', GROUP_CONCAT(DISTINCT positions.positionName, ' ', company.companyName ORDER BY positions.positionName SEPARATOR ',') AS 'Applications' FROM candidate, experience, technology, company, positions, position_has_candidate WHERE candidate.candidateId = experience.candidateId AND experience.technologyId = technology.technologyId AND position_has_candidate.candidate_candidateId = candidate.candidateId AND position_has_candidate.position_positionId = positions.positionId AND positions.companyId = company.companyId GROUP BY candidate.candidateId ORDER BY candidate.candidateFirstName, candidate.candidateLastName";
+        String query = "SELECT candidate.candidateId, candidate.candidateFirstName, candidate.candidateLastName, candidate.age, candidate.candidateEmail, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', experience.years ORDER BY experience.years SEPARATOR ',') AS 'Experience', GROUP_CONCAT(DISTINCT positions.positionName, ' ', company.companyName ORDER BY positions.positionName SEPARATOR ',') AS 'Applications' FROM candidate, experience, technology, company, positions, position_has_candidate WHERE candidate.candidateId = experience.candidateId AND experience.technologyId = technology.technologyId AND position_has_candidate.candidate_candidateId = candidate.candidateId AND position_has_candidate.position_positionId = positions.positionId AND positions.companyId = company.companyId GROUP BY candidate.candidateId ORDER BY candidate.candidateFirstName, candidate.candidateLastName";
         return DBUtils.execQueryAndBuildResult(query, null, this);
     }
 
@@ -59,30 +59,38 @@ public class DBCandidateQueryHandler implements EntityDbHandler {
 
             connection = DBConnectionHandler.openDatabaseConnection();
 
-            // TODO: Search if such Candidate already exists in the database by email after the email property is implemented in the Entity.
+            // Check if a Candidate with such email address is already present in the database.
+            String candidateEmail = candidate.getCandidateEmail();
+            String candidateExistsQuery = "SELECT candidateId FROM candidate WHERE candidateEmail = ?";
+            boolean candidateExists = DBUtils.isParamExists(candidateEmail, candidateExistsQuery);
 
-            // Prepare the query and execute it.
-            String candidateFirstName = candidate.getCandidateFirstName();
-            String candidateLastName = candidate.getCandidateLastName();
-            int age = candidate.getAge();
+            // Add the new Candidate if the email address is not found in the database.
+            if (!candidateExists) {
+                // Prepare the query and execute it.
+                String candidateFirstName = candidate.getCandidateFirstName();
+                String candidateLastName = candidate.getCandidateLastName();
+                int age = candidate.getAge();
 
-            String candidateQuery = "INSERT INTO candidate(candidateFirstName, candidateLastName, age) VALUES(?, ?, ?)";
 
-            if (connection != null) {
-                connection.setAutoCommit(false);
-                statement = connection.prepareStatement(candidateQuery, Statement.RETURN_GENERATED_KEYS);
+                String candidateQuery = "INSERT INTO candidate(candidateFirstName, candidateLastName, age, candidateEmail) VALUES(?, ?, ?, ?)";
 
-                statement.setString(1, candidateFirstName);
-                statement.setString(2, candidateLastName);
-                statement.setInt(3, age);
+                if (connection != null) {
+                    connection.setAutoCommit(false);
+                    statement = connection.prepareStatement(candidateQuery, Statement.RETURN_GENERATED_KEYS);
 
-                statement.execute();
+                    statement.setString(1, candidateFirstName);
+                    statement.setString(2, candidateLastName);
+                    statement.setInt(3, age);
+                    statement.setString(4, candidateEmail);
 
-                ResultSet resultSet = statement.getGeneratedKeys();
-                resultSet.next();
-                candidateId = resultSet.getInt(1);
-                System.out.println("New candidate's ID: " + candidateId);
-                connection.commit();
+                    statement.execute();
+
+                    ResultSet resultSet = statement.getGeneratedKeys();
+                    resultSet.next();
+                    candidateId = resultSet.getInt(1);
+                    System.out.println("New candidate's ID: " + candidateId);
+                    connection.commit();
+                }
             }
         } finally {
             if (statement != null) {
@@ -102,9 +110,13 @@ public class DBCandidateQueryHandler implements EntityDbHandler {
             if (arrNode.isArray() && candidateId > 0) {
                 for (JsonNode object : arrNode) {
                     int technologyId = Integer.parseInt(object.get("technologyId").textValue());
+
+                    // Check if such Technology exists in the database.
                     String technologyExistsQuery = "SELECT technologyId FROM technology WHERE technologyId = ?";
-                    String candidateHasTechnologyQuery = "SELECT experienceId FROM experience WHERE candidateId = ? AND technologyId = ?";
                     boolean technologyExists = DBUtils.isParamExists(technologyId, technologyExistsQuery);
+
+                    // Check if the Candidate already has such Technology added.
+                    String candidateHasTechnologyQuery = "SELECT experienceId FROM experience WHERE candidateId = ? AND technologyId = ?";
                     boolean candidateHasTechnology = DBUtils.isParamExists(candidateId, technologyId, candidateHasTechnologyQuery);
 
                     if (technologyExists && !candidateHasTechnology) {
@@ -190,7 +202,7 @@ public class DBCandidateQueryHandler implements EntityDbHandler {
      */
     public Entity searchEntityById(int candidateId) throws SQLException {
         Object[] params = {candidateId};
-        String query = "SELECT candidate.candidateId, candidate.candidateFirstName, candidate.candidateLastName, candidate.age, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', experience.years ORDER BY experience.years SEPARATOR ',') AS 'Experience', GROUP_CONCAT(DISTINCT positions.positionName, ' ', company.companyName ORDER BY positions.positionName SEPARATOR ',') AS 'Applications' FROM candidate, experience, technology, company, positions, position_has_candidate WHERE candidate.candidateId = ? AND candidate.candidateId = experience.candidateId AND experience.technologyId = technology.technologyId AND position_has_candidate.candidate_candidateId = candidate.candidateId AND position_has_candidate.position_positionId = positions.positionId AND positions.companyId = company.companyId GROUP BY candidate.candidateId ORDER BY candidate.candidateFirstName, candidate.candidateLastName;";
+        String query = "SELECT candidate.candidateId, candidate.candidateFirstName, candidate.candidateLastName, candidate.age, candidate.candidateEmail, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', experience.years ORDER BY experience.years SEPARATOR ',') AS 'Experience', GROUP_CONCAT(DISTINCT positions.positionName, ' ', company.companyName ORDER BY positions.positionName SEPARATOR ',') AS 'Applications' FROM candidate, experience, technology, company, positions, position_has_candidate WHERE candidate.candidateId = ? AND candidate.candidateId = experience.candidateId AND experience.technologyId = technology.technologyId AND position_has_candidate.candidate_candidateId = candidate.candidateId AND position_has_candidate.position_positionId = positions.positionId AND positions.companyId = company.companyId GROUP BY candidate.candidateId ORDER BY candidate.candidateFirstName, candidate.candidateLastName;";
         List<Entity> result = DBUtils.execQueryAndBuildResult(query, params, this);
 
         if (result != null && result.size() > 0) {
@@ -209,7 +221,7 @@ public class DBCandidateQueryHandler implements EntityDbHandler {
      */
     public List<Entity> searchCandidateByParams(Map<String, String> parameters) throws SQLException {
         // The SELECT and FROM part of the query.
-        String query = "SELECT candidate.candidateId, candidate.candidateFirstName, candidate.candidateLastName, candidate.age, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', experience.years ORDER BY experience.years SEPARATOR ',') AS 'Experience', GROUP_CONCAT(DISTINCT positions.positionName, ' ', company.companyName ORDER BY positions.positionName SEPARATOR ',') AS 'Applications' FROM candidate, experience, technology, company, positions, position_has_candidate";
+        String query = "SELECT candidate.candidateId, candidate.candidateFirstName, candidate.candidateLastName, candidate.age, candidate.candidateEmail, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', experience.years ORDER BY experience.years SEPARATOR ',') AS 'Experience', GROUP_CONCAT(DISTINCT positions.positionName, ' ', company.companyName ORDER BY positions.positionName SEPARATOR ',') AS 'Applications' FROM candidate, experience, technology, company, positions, position_has_candidate";
         int count = 0;                                                  // Used to build the array holding the parameters for query execution.
         Object[] params = new Object[parameters.size()];                // Array of objects holding the parameters for the query execution.
         Set<String> keys = parameters.keySet();                         // Set holding the keys of the Map used to iterate through it and build the array.
@@ -391,6 +403,15 @@ public class DBCandidateQueryHandler implements EntityDbHandler {
                         check = true;
                     }
 
+                    // If we want to modify the email of a Candidate.
+                    if (operation.equalsIgnoreCase("modifyEmail")) {
+                        String candidateEmail = node.get("candidateEmail").textValue();
+                        query = "UPDATE candidate SET candidateEmail = ? WHERE candidateId = ?";
+                        params = new Object[]{candidateEmail, candidateId};
+                        DBUtils.execQuery(query, params);
+                        check = true;
+                    }
+
                     // If we want to add a Position for which the Candidate applied.
                     if (operation.equalsIgnoreCase("addApplication")) {
                         // Check if the Candidate already applied for that Position.
@@ -449,8 +470,9 @@ public class DBCandidateQueryHandler implements EntityDbHandler {
                     String candidateFirstName = resultSet.getString("candidateFirstName");      // The first name of the Candidate.
                     String candidateLastName = resultSet.getString("candidateLastName");        // The last name of the Candidate.
                     int age = resultSet.getInt("age");                                          // The age of the Candidate.
+                    String candidateEmail = resultSet.getString("candidateEmail");              // The email of the Candidate.
                     String experienceStr = resultSet.getString("Experience");                   // The string holding the details with the experience.
-                    String applicationStr = resultSet.getString("Applications");                 // The string holding the details with the applications.
+                    String applicationStr = resultSet.getString("Applications");                // The string holding the details with the applications.
 
                     ArrayList<Experience> candidateExperience = new ArrayList<Experience>();      // The List holding all details of the Experience of the Candidate.
                     ArrayList<Position> candidateApplication = new ArrayList<Position>();       // The List holding all details of the Positions for which the Candidate applied.
@@ -482,7 +504,7 @@ public class DBCandidateQueryHandler implements EntityDbHandler {
                     }
 
                     // Create the Candidate object, set its Experience and application and put them into the proper List.
-                    Candidate candidate = new Candidate(candidateId, candidateFirstName, candidateLastName, age);
+                    Candidate candidate = new Candidate(candidateId, candidateFirstName, candidateLastName, age, candidateEmail);
                     candidate.setExperiences(candidateExperience);
                     candidate.setApplications(candidateApplication);
                     data.add(candidate);

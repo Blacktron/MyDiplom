@@ -39,7 +39,7 @@ public class DBPositionQueryHandler implements EntityDbHandler {
      * @throws SQLException
      */
     public List<Entity> getAllEntities() throws SQLException {
-        String query = "SELECT positions.positionId, positions.positionName, positions.hrId, hr.hrFirstName, hr.hrLastName, positions.companyId, company.companyName, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', requirement.years, ' ', requirement.priority ORDER BY positions.positionId SEPARATOR ',') AS 'Requirement', GROUP_CONCAT(DISTINCT candidate.candidateId, ' ', candidate.candidateFirstName, ' ', candidate.candidateLastName, ' ', candidate.age ORDER BY candidate.candidateId SEPARATOR ',') AS 'Applicant' FROM positions, hr, company, requirement, technology, candidate, position_has_candidate WHERE positions.hrId = hr.hrId AND positions.companyId = company.companyId AND requirement.positionId = positions.positionId AND requirement.technologyId = technology.technologyId AND position_has_candidate.candidate_candidateId = candidate.candidateId AND position_has_candidate.position_positionId = positions.positionId GROUP BY positions.positionId ORDER BY positions.positionName";
+        String query = "SELECT positions.positionId, positions.positionName, positions.hrId, hr.hrFirstName, hr.hrLastName, positions.companyId, company.companyName, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', requirement.years, ' ', requirement.priority ORDER BY positions.positionId SEPARATOR ',') AS 'Requirement', GROUP_CONCAT(DISTINCT candidate.candidateId, ' ', candidate.candidateFirstName, ' ', candidate.candidateLastName, ' ', candidate.age, ' ', candidate.candidateEmail ORDER BY candidate.candidateId SEPARATOR ',') AS 'Applicant' FROM positions, hr, company, requirement, technology, candidate, position_has_candidate WHERE positions.hrId = hr.hrId AND positions.companyId = company.companyId AND requirement.positionId = positions.positionId AND requirement.technologyId = technology.technologyId AND position_has_candidate.candidate_candidateId = candidate.candidateId AND position_has_candidate.position_positionId = positions.positionId GROUP BY positions.positionId ORDER BY positions.positionName";
         return DBUtils.execQueryAndBuildResult(query, null, this);
     }
 
@@ -216,7 +216,7 @@ public class DBPositionQueryHandler implements EntityDbHandler {
      */
     public Entity searchEntityById(int positionId) throws SQLException {
         Object[] params = {positionId};
-        String query = "SELECT positions.positionId, positions.positionName, positions.hrId, hr.hrFirstName, hr.hrLastName, positions.companyId, company.companyName, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', requirement.years, ' ', requirement.priority ORDER BY positions.positionId SEPARATOR ',') AS 'Requirement', GROUP_CONCAT(DISTINCT candidate.candidateId, ' ', candidate.candidateFirstName, ' ', candidate.candidateLastName, ' ', candidate.age ORDER BY candidate.candidateId SEPARATOR ',') AS 'Applicant' FROM mydb.positions, mydb.hr, mydb.company, mydb.requirement, mydb.technology, mydb.candidate, mydb.position_has_candidate WHERE positions.positionId = ? AND positions.hrId = hr.hrId AND positions.companyId = company.companyId AND requirement.positionId = positions.positionId AND requirement.technologyId = technology.technologyId AND position_has_candidate.candidate_candidateId = candidate.candidateId AND position_has_candidate.position_positionId = positions.positionId GROUP BY positions.positionId ORDER BY positions.positionName";
+        String query = "SELECT positions.positionId, positions.positionName, positions.hrId, hr.hrFirstName, hr.hrLastName, positions.companyId, company.companyName, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', requirement.years, ' ', requirement.priority ORDER BY positions.positionId SEPARATOR ',') AS 'Requirement', GROUP_CONCAT(DISTINCT candidate.candidateId, ' ', candidate.candidateFirstName, ' ', candidate.candidateLastName, ' ', candidate.age, ' ', candidate.candidateEmail ORDER BY candidate.candidateId SEPARATOR ',') AS 'Applicant' FROM mydb.positions, mydb.hr, mydb.company, mydb.requirement, mydb.technology, mydb.candidate, mydb.position_has_candidate WHERE positions.positionId = ? AND positions.hrId = hr.hrId AND positions.companyId = company.companyId AND requirement.positionId = positions.positionId AND requirement.technologyId = technology.technologyId AND position_has_candidate.candidate_candidateId = candidate.candidateId AND position_has_candidate.position_positionId = positions.positionId GROUP BY positions.positionId ORDER BY positions.positionName";
         List<Entity> result = DBUtils.execQueryAndBuildResult(query, params, this);
 
         if (result != null && result.size() > 0) {
@@ -235,7 +235,7 @@ public class DBPositionQueryHandler implements EntityDbHandler {
      */
     public List<Entity> searchPositionByParams(Map<String, String> parameters) throws SQLException {
         // The SELECT and FROM part of the query.
-        String query = "SELECT positions.positionId, positions.positionName, positions.hrId, hr.hrFirstName, hr.hrLastName, positions.companyId, company.companyName, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', requirement.years, ' ', requirement.priority ORDER BY positions.positionId SEPARATOR ',') AS 'Requirement', GROUP_CONCAT(DISTINCT candidate.candidateId, ' ', candidate.candidateFirstName, ' ', candidate.candidateLastName, ' ', candidate.age ORDER BY candidate.candidateId SEPARATOR ',') AS 'Applicant' FROM mydb.positions, mydb.hr, mydb.company, mydb.requirement, mydb.technology, mydb.candidate, mydb.position_has_candidate";
+        String query = "SELECT positions.positionId, positions.positionName, positions.hrId, hr.hrFirstName, hr.hrLastName, positions.companyId, company.companyName, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', requirement.years, ' ', requirement.priority ORDER BY positions.positionId SEPARATOR ',') AS 'Requirement', GROUP_CONCAT(DISTINCT candidate.candidateId, ' ', candidate.candidateFirstName, ' ', candidate.candidateLastName, ' ', candidate.age, ' ', candidate.candidateEmail ORDER BY candidate.candidateId SEPARATOR ',') AS 'Applicant' FROM mydb.positions, mydb.hr, mydb.company, mydb.requirement, mydb.technology, mydb.candidate, mydb.position_has_candidate";
         int count = 0;                                                      // Used to build the array holding the parameters for query execution.
         Object[] params = new Object[parameters.size()];                    // Array of objects holding the parameters for the query execution.
         Set<String> keys = parameters.keySet();                             // Set holding the keys of the Map used to iterate through it and build the array.
@@ -415,7 +415,7 @@ public class DBPositionQueryHandler implements EntityDbHandler {
 
         try {
             connection = DBConnectionHandler.openDatabaseConnection();
-            String query = "SELECT positions.positionId, positions.positionName, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', requirement.years, ' ', requirement.priority ORDER BY requirement.years SEPARATOR ',') AS 'Requirements', GROUP_CONCAT(DISTINCT candidate.candidateId, ' ', candidate.candidateFirstName, ' ', candidate.candidateLastName, ' ', candidate.age, ' ', technology.technologyName, ' ', experience.years ORDER BY candidate.candidateId) AS 'Candidates' FROM mydb.positions, mydb.candidate, mydb.technology, mydb.experience, mydb.requirement, mydb.position_has_candidate WHERE positions.positionId = ? AND positions.positionId = position_has_candidate.position_positionId AND candidate.candidateId = position_has_candidate.candidate_candidateId AND requirement.technologyId = technology.technologyId AND candidate.candidateId = experience.candidateId AND technology.technologyId = experience.technologyId GROUP BY positions.positionName;";
+            String query = "SELECT positions.positionId, positions.positionName, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', requirement.years, ' ', requirement.priority ORDER BY requirement.years SEPARATOR ',') AS 'Requirements', GROUP_CONCAT(DISTINCT candidate.candidateId, ' ', candidate.candidateFirstName, ' ', candidate.candidateLastName, ' ', candidate.age, ' ', candidate.candidateEmail, ' ', technology.technologyName, ' ', experience.years ORDER BY candidate.candidateId) AS 'Candidates' FROM mydb.positions, mydb.candidate, mydb.technology, mydb.experience, mydb.requirement, mydb.position_has_candidate WHERE positions.positionId = ? AND positions.positionId = position_has_candidate.position_positionId AND candidate.candidateId = position_has_candidate.candidate_candidateId AND requirement.technologyId = technology.technologyId AND candidate.candidateId = experience.candidateId AND technology.technologyId = experience.technologyId GROUP BY positions.positionName;";
             List<Entity> matches;       // The List holding the data returned from the database.
 
             if (connection != null) {
@@ -456,8 +456,8 @@ public class DBPositionQueryHandler implements EntityDbHandler {
             try {
                 while (resultSet.next()) {
                     int positionId = resultSet.getInt("positionId");                            // The ID of the Position.
-                    int hrId = resultSet.getInt("hrId");                                        // The ID of the HR which is responsible for the Position.
-                    int companyId = resultSet.getInt("companyId");                              // The ID of the Company for which the Position is opened.
+//                    int hrId = resultSet.getInt("hrId");                                        // The ID of the HR which is responsible for the Position.
+//                    int companyId = resultSet.getInt("companyId");                              // The ID of the Company for which the Position is opened.
                     String positionName = resultSet.getString("positionName");                  // The name of the Position.
                     String hrFirstName = resultSet.getString("hrFirstName");                    // The first name of the HR.
                     String hrLastName = resultSet.getString("hrLastName");                      // The last name of the HR.
@@ -492,13 +492,14 @@ public class DBPositionQueryHandler implements EntityDbHandler {
                         String candidateFirstName = applicantData[1];           // The first name of the Candidate.
                         String candidateLastName = applicantData[2];            // The last name of the Candidate.
                         int age = Integer.parseInt(applicantData[3]);           // The age of the Candidate.
+                        String candidateEmail = applicantData[4];               // The email of the Candidate.
 
-                        Candidate candidate = new Candidate(candidateId, candidateFirstName, candidateLastName, age);
+                        Candidate candidate = new Candidate(candidateId, candidateFirstName, candidateLastName, age, candidateEmail);
                         candidateApplicant.add(candidate);
                     }
 
                     // Create the Position object, set its Requirements and put it into the List.
-                    Position position = new Position(positionId, hrId, companyId, positionName, hrFirstName, hrLastName, companyName);
+                    Position position = new Position(positionId, positionName, hrFirstName, hrLastName, companyName);
                     position.setRequirements(positionRequirement);
                     position.setApplicants(candidateApplicant);
                     data.add(position);
@@ -557,28 +558,17 @@ public class DBPositionQueryHandler implements EntityDbHandler {
                         String candidateFirstName = applicantData[1];           // The first name of the Candidate.
                         String candidateLastName = applicantData[2];            // The last name of the Candidate.
                         int age = Integer.parseInt(applicantData[3]);           // The age of the Candidate.
-                        String technologyName = applicantData[4];               // The name of the Technology.
-                        int years = Integer.parseInt(applicantData[5]);         // The years of experience the Candidate has with that Technology.
+                        String candidateEmail = applicantData[4];               // The email of the Candidate.
+                        String technologyName = applicantData[5];               // The name of the Technology.
+                        int years = Integer.parseInt(applicantData[6]);         // The years of experience the Candidate has with that Technology.
 
-                        // If there are no Candidate in the List yet, create the first one and its Experience and add it to the List.
-                        if (candidateApplicant.size() == 0) {
-                            candidate = new Candidate(candidateId, candidateFirstName, candidateLastName, age);
-                            experience = new Experience();
-                            experience.setTechnologyName(technologyName);
-                            experience.setYears(years);
-                            candidateExperience.add(experience);
-                            candidate.setExperiences(candidateExperience);
-                            candidateApplicant.add(candidate);
-                        } else if (candidateId == candidateApplicant.get(candidateApplicant.size() - 1).getId()) {
-                            candidate = candidateApplicant.get(candidateApplicant.size() - 1);
-                            candidateExperience = (ArrayList<Experience>) candidate.getExperiences();
-                            experience = new Experience();
-                            experience.setTechnologyName(technologyName);
-                            experience.setYears(years);
-                            candidateExperience.add(experience);
-                            candidate.setExperiences(candidateExperience);
-                        } else {
-                            candidate = new Candidate(candidateId, candidateFirstName, candidateLastName, age);
+                        /*
+                            If there are no Candidates in the List yet of if the lastly created Candidate
+                            is different from the newly one which to be created - create the Candidate and
+                            its Experience and add it to the List.
+                        */
+                        if (candidateApplicant.size() == 0 || candidateId != candidateApplicant.get(candidateApplicant.size() - 1).getId()) {
+                            candidate = new Candidate(candidateId, candidateFirstName, candidateLastName, age, candidateEmail);
                             experience = new Experience();
                             experience.setTechnologyName(technologyName);
                             experience.setYears(years);
@@ -586,6 +576,28 @@ public class DBPositionQueryHandler implements EntityDbHandler {
                             candidate.setExperiences(candidateExperience);
                             candidateApplicant.add(candidate);
                         }
+                        /*
+                            If there is data to be added for the lastly created Candidate, append the Experience to him.
+                            This works because the Candidates are ordered by ID.
+                         */
+                        else if (candidateId == candidateApplicant.get(candidateApplicant.size() - 1).getId()) {
+                            candidate = candidateApplicant.get(candidateApplicant.size() - 1);
+                            candidateExperience = (ArrayList<Experience>) candidate.getExperiences();
+                            experience = new Experience();
+                            experience.setTechnologyName(technologyName);
+                            experience.setYears(years);
+                            candidateExperience.add(experience);
+                            candidate.setExperiences(candidateExperience);
+                        }
+//                        else {
+//                            candidate = new Candidate(candidateId, candidateFirstName, candidateLastName, age, candidateEmail);
+//                            experience = new Experience();
+//                            experience.setTechnologyName(technologyName);
+//                            experience.setYears(years);
+//                            candidateExperience.add(experience);
+//                            candidate.setExperiences(candidateExperience);
+//                            candidateApplicant.add(candidate);
+//                        }
                     }
 
                     // Create the Position object, set its Requirements and put it into the List.

@@ -19,6 +19,6 @@
     </servlet-mapping>
 
     <welcome-file-list>
-        <welcome-file>addUser.html</welcome-file>
+        <welcome-file>mainPage.html</welcome-file>
     </welcome-file-list>
 </web-app>

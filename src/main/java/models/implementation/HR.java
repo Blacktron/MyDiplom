@@ -10,6 +10,7 @@ public class HR extends Entity {
     private String hrFirstName;     // The first name of the HR.
     private String hrLastName;      // The last name of the HR.
     private String phone;           // The phone of the HR.
+    private String hrEmail;           // The hrEmail of the HR.
     private int companyId;          // The Company ID which the HR is working for.
     private String companyName;     // The name of the Company which the HR is working for.
 
@@ -39,21 +40,27 @@ public class HR extends Entity {
         if (node.has("phone")) {
             setPhone(node.get("phone").textValue());
         }
+
+        if (node.has("hrEmail")) {
+            setHrEmail(node.get("hrEmail").textValue());
+        }
     }
 
     /**
      * Custom constructor which accepts five parameters. It is used when building the result after search.
-     * @param hrId the ID of the Candidate.
-     * @param hrFirstName the first name of the Candidate.
-     * @param hrLastName the last name of the Candidate.
+     * @param hrId the ID of the HR.
+     * @param hrFirstName the first name of the HR.
+     * @param hrLastName the last name of the HR.
      * @param phone the age of the Candidate.
+     * @param hrEmail the hrEmail of the HR
      * @param companyName the name of the Company which the HR is working for.
      */
-    public HR(int hrId, String hrFirstName, String hrLastName, String phone, String companyName) {
+    public HR(int hrId, String hrFirstName, String hrLastName, String phone, String hrEmail, String companyName) {
         setId(hrId);
         setHrFirstName(hrFirstName);
         setHrLastName(hrLastName);
         setPhone(phone);
+        setHrEmail(hrEmail);
         setCompanyName(companyName);
     }
 
@@ -82,8 +89,8 @@ public class HR extends Entity {
     }
 
     /**
-     * Sets the first name of the HR.
-     * @param hrLastName the first name of the HR.
+     * Sets the last name of the HR.
+     * @param hrLastName the last name of the HR.
      */
     public void setHrLastName(String hrLastName) {
         this.hrLastName = hrLastName;
@@ -98,11 +105,27 @@ public class HR extends Entity {
     }
 
     /**
-     * Sets the first name of the HR.
-     * @param phone the first name of the HR.
+     * Sets the phone of the HR.
+     * @param phone the phone of the HR.
      */
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    /**
+     * Shows the hrEmail of the HR.
+     * @return the hrEmail of the HR.
+     */
+    public String getHrEmail() {
+        return hrEmail;
+    }
+
+    /**
+     * Sets the hrEmail of the HR.
+     * @param hrEmail the hrEmail of the HR.
+     */
+    public void setHrEmail(String hrEmail) {
+        this.hrEmail = hrEmail;
     }
 
     /**
@@ -148,6 +171,7 @@ public class HR extends Entity {
                 "hrFirstName='" + hrFirstName + '\'' +
                 ", hrLastName='" + hrLastName + '\'' +
                 ", phone='" + phone + '\'' +
+                ", hrEmail='" + hrEmail + '\'' +
                 ", companyId=" + companyId +
                 '}';
     }

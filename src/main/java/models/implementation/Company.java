@@ -58,7 +58,7 @@ public class Company extends Entity {
     public String toString() {
         return "Company{" +
                 "id='" + id + '\'' +
-                "companyName='" + companyName + '\'' +
+                "companyName='" + companyName +
                 '}';
     }
 }

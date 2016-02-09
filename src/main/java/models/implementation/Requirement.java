@@ -149,7 +149,7 @@ public class Requirement extends Entity {
                 ", positionId=" + positionId + '\'' +
                 ", technologyId=" + technologyId + '\'' +
                 ", years=" + years + '\'' +
-                ", priority=" + priority + '\'' +
+                ", priority=" + priority +
                 '}';
     }
 }

@@ -126,7 +126,7 @@ public class Experience extends Entity {
                 "id=" + id + '\'' +
                 "candidateId=" + candidateId + '\'' +
                 ", technologyId=" + technologyId + '\'' +
-                ", years=" + years + '\'' +
+                ", years=" + years +
                 '}';
     }
 }

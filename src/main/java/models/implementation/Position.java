@@ -56,17 +56,15 @@ public class Position extends Entity {
     /**
      * Custom constructor which accepts seven parameters. It is used when building the result after search.
      * @param positionId the ID of the position in the database.
-     * @param hrId the ID of the HR in the database.
-     * @param companyId the ID of the company in the database.
+//     * @param hrId the ID of the HR in the database.
+//     * @param companyId the ID of the company in the database.
      * @param positionName the name of the position.
      * @param hrFirstName the first name of the HR.
      * @param hrLastName the last name of the HR.
      * @param companyName the name of the company.
      */
-    public Position(int positionId, int hrId, int companyId, String positionName, String hrFirstName, String hrLastName, String companyName) {
+    public Position(int positionId, String positionName, String hrFirstName, String hrLastName, String companyName) {
         setId(positionId);
-        setHrId(hrId);
-        setCompanyId(companyId);
         setPositionName(positionName);
         setHrFirstName(hrFirstName);
         setHrLastName(hrLastName);
@@ -211,7 +209,7 @@ public class Position extends Entity {
                 "id='" + id + '\'' +
                 ", hrId=" + hrId + '\'' +
                 ", companyId=" + companyId + '\'' +
-                ", name='" + positionName + '\'' +
+                ", name='" + positionName +
                 '}';
     }
 }

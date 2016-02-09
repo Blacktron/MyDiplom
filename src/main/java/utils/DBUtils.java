@@ -180,12 +180,12 @@ public class DBUtils {
      * Method which checks if an entry exists in the database.
      * This is used when making a new entry or an update to an entry making
      * sure not to add something which is missing from the database.
-     * @param param1 the ID of the first parameter which to search for in the database.
+     * @param param the ID of the first parameter which to search for in the database.
      * @param query the query to be executed.
      * @return true if the parameter exists in the database, false otherwise.
      * @throws SQLException
      */
-    public static boolean isParamExists(int param1, String query) throws SQLException {
+    public static boolean isParamExists(int param, String query) throws SQLException {
         boolean check = false;
         Connection connection = null;
         PreparedStatement statement = null;
@@ -197,7 +197,7 @@ public class DBUtils {
             if (connection != null) {
                 statement = connection.prepareStatement(query);
 
-                statement.setInt(1, param1);
+                statement.setInt(1, param);
 
                 resultSet = statement.executeQuery();
             }
@@ -222,12 +222,12 @@ public class DBUtils {
      * Method which checks if an entry exists in the database.
      * This is used when making a new entry or an update to an entry making
      * sure not to add something which is missing from the database.
-     * @param param1 the first parameter which to search for in the database.
+     * @param param the first parameter which to search for in the database.
      * @param query the query to be executed.
      * @return true if the parameter exists in the database, false otherwise.
      * @throws SQLException
      */
-    public static boolean isParamExists(String param1, String query) throws SQLException {
+    public static boolean isParamExists(String param, String query) throws SQLException {
         boolean check = false;
         Connection connection = null;
         PreparedStatement statement = null;
@@ -239,7 +239,7 @@ public class DBUtils {
             if (connection != null) {
                 statement = connection.prepareStatement(query);
 
-                statement.setString(1, param1);
+                statement.setString(1, param);
 
                 resultSet = statement.executeQuery();
             }

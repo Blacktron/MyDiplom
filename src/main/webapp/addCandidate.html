@@ -1,66 +1,83 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-	<script type="text/javascript">
-		function addUser() {
-			var firstName = $('#fname').val();
-			var lastName = $('#lname').val();
-			var years = $('#age').val();
-			var lang1 = $('#language1').val();
-			var lang2 = $('#language2').val();
-			var lang3 = $('#language3').val();
+<!-- /*<style>
+  label { width: 100px; text-align: right; margin-right: 5px; }
+  input { width: 200px; }
+</style>*/ -->
 
-			var user = {
-				firName : firstName,
-				lastName : lastName,
-				age : years,
-				language1 : lang1,
-				language2 : lang2,
-				language3 : lang3
-			};
+<!-- Include local JavaScript file -->
+<script src="formInclude.js"></script>
+<script src="candidateActions.js"></script>
+<script type="text/javascript">
+    /*
+        On page load - get the technologies from the database and store them in the global variable 'techs'
+    */
+    $.ajax({
+        method: 'GET',
+        url: '/rest/technologies',
+        data: {
+            format: 'json'
+        },
+        dataType: 'json',
+        success: function(data) {
+            techs = data;
+        },
+        error: function(data) {
+            alert(data);
+        }
+    });
+</script>
 
-			console.log(user);
+<form class="form-horizontal">
+    <div class="form-group">
+        <label for="candidate-first-name" class="col-sm-2 control-label">First Name</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="candidate-first-name" placeholder="First Name" maxlength="50"
+                   required>
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
 
-			$.ajax({
-				method: 'POST',
-				url: '/hello/addCandidate',
-				dataType: 'json',
-				data: JSON.stringify(user),
-				contentType: "application/json; charset=utf-8",
-				success: function() {
-					alert("Operation completed successfully");
-				},
-				error: function() {
-				    alert("Something broke");
-				}
-			});
-		}
-	</script>
-	<meta charset="UTF-8">
-	<title>Add User</title>
-</head>
-<body>
-	<form method="POST">
-		<label for="fname">First Name:</label>
-		<input type="text" name="fname" id="fname" autofocus="autofocus"> <br />
+    <div class="form-group">
+        <label for="candidate-last-name" class="col-sm-2 control-label">Last Name</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="candidate-last-name" placeholder="Last Name" maxlength="50"
+                   required>
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
 
-		<label for="lname">Last Name:</label>
-		<input type="text" name="lname" id="lname"> <br />
+    <div class="form-group">
+        <label for="candidate-age" class="col-sm-2 control-label">Age</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="candidate-age" placeholder="Age" maxlength="2" required>
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
 
-		<label for="age">Age:</label>
-		<input type="text" name="age" id="age"> <br />
+    <div class="form-group">
+        <label for="candidate-email" class="col-sm-2 control-label">Email</label>
+        <div class="col-sm-4">
+            <input type="email" class="form-control" id="candidate-email" placeholder="Email" maxlength="100" required>
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
 
-		<label for="language1">Language 1:</label>
-		<input type="text" name="language1" id="language1"> <br />
+    <div class="experience-container">
+        <div id="experience-list">
+            <!-- Experience fields go here. -->
+        </div>
+    </div>
 
-		<label for="language2">Language 2:</label>
-		<input type="text" name="language2" id="language2"> <br />
+    <!-- Add experience button. -->
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-9">
+            <button type="button" class="btn btn-default" id="add-experience-button">Add Experience</button>
+        </div>
+    </div>
 
-		<label for="language3">Language 3:</label>
-		<input type="text" name="language3" id="language3"> <br />
-
-		<input type="button" value="Add New User" onclick="addUser()" />
-	</form>
-</body>
-</html>
+    <!-- Add candidate button. -->
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-default" onclick="addCandidate()">Add Candidate</button>
+        </div>
+    </div>
+</form>

@@ -36,7 +36,7 @@ public class DBHRQueryHandler implements EntityDbHandler {
      * @throws SQLException
      */
     public List<Entity> getAllEntities() throws SQLException {
-        String query = "SELECT hr.hrId, hr.hrFirstName, hr.hrLastName, company.companyName, hr.phone FROM hr, company WHERE hr.companyId = company.companyId ORDER BY company.companyName, hr.hrFirstName, hr.hrLastName";
+        String query = "SELECT hr.hrId, hr.hrFirstName, hr.hrLastName, hr.phone, hr.hrEmail, company.companyId, company.companyName, FROM hr, company WHERE hr.companyId = company.companyId ORDER BY company.companyName, hr.hrFirstName, hr.hrLastName";
         return DBUtils.execQueryAndBuildResult(query, null, this);
     }
 
@@ -46,26 +46,33 @@ public class DBHRQueryHandler implements EntityDbHandler {
      * @throws SQLException
      */
     public boolean addEntity(JsonNode node) throws SQLException {
-        // TODO: Search if such HR already exists in the database by email after the email property is implemented in the Entity.
         boolean check = false;
         HR hr = new HR(node);
 
-        // Prepare the query and execute it.
-        String hrFirstName = hr.getHrFirstName();
-        String hrLastName = hr.getHrLastName();
-        String phone = hr.getPhone();
-        int companyId = hr.getCompanyId();
+        // Check if an HR with such email address is already present in the database.
+        String hrEmail = hr.getHrEmail();
+        String hrExistsQuery = "SELECT hrId FROM hr WHERE hrEmail = ?";
+        boolean hrExists = DBUtils.isParamExists(hrEmail, hrExistsQuery);
 
-        // Check if such Company already exists in the database.
-        String companyExistsQuery = "SELECT companyId FROM company WHERE companyId = ?";
-        boolean companyExists = DBUtils.isParamExists(companyId, companyExistsQuery);
+        // Add the new Candidate if the email address is not found in the database.
+        if (!hrExists) {
+            // Prepare the query and execute it.
+            String hrFirstName = hr.getHrFirstName();
+            String hrLastName = hr.getHrLastName();
+            String phone = hr.getPhone();
+            int companyId = hr.getCompanyId();
 
-        // If there is such Company in the database, prepare the query and execute it.
-        if (companyExists) {
-            String query = "INSERT INTO hr(companyId, hrFirstName, hrLastName, phone) VALUES(?, ?, ?, ?)";
-            Object[] params = {companyId, hrFirstName, hrLastName, phone};
-            DBUtils.execQuery(query, params);
-            check = true;
+            // Check if such Company already exists in the database.
+            String companyExistsQuery = "SELECT companyId FROM company WHERE companyId = ?";
+            boolean companyExists = DBUtils.isParamExists(companyId, companyExistsQuery);
+
+            // If there is such Company in the database, prepare the query and execute it.
+            if (companyExists) {
+                String query = "INSERT INTO hr(companyId, hrFirstName, hrLastName, phone) VALUES(?, ?, ?, ?)";
+                Object[] params = {companyId, hrFirstName, hrLastName, phone};
+                DBUtils.execQuery(query, params);
+                check = true;
+            }
         }
 
         return check;
@@ -125,7 +132,7 @@ public class DBHRQueryHandler implements EntityDbHandler {
      */
     public Entity searchEntityById(int hrId) throws SQLException {
         Object[] params = {hrId};
-        String query = "SELECT hr.hrId, hr.hrFirstName, hr.hrLastName, hr.phone, company.companyName FROM hr, company WHERE hrId = ? AND hr.companyId = company.companyId GROUP BY hr.hrId ORDER BY hr.hrFirstName, hr.hrLastName";
+        String query = "SELECT hr.hrId, hr.hrFirstName, hr.hrLastName, hr.phone, hr.hrEmail, company.companyId, company.companyName FROM hr, company WHERE hrId = ? AND hr.companyId = company.companyId GROUP BY hr.hrId ORDER BY hr.hrFirstName, hr.hrLastName";
         List<Entity> result = DBUtils.execQueryAndBuildResult(query, params, this);
 
         if (result != null && result.size() > 0) {
@@ -144,12 +151,12 @@ public class DBHRQueryHandler implements EntityDbHandler {
      */
     public List<Entity> searchHRByParams(Map<String, String> parameters) throws SQLException {
 
-        String query = "SELECT hr.hrId, hr.hrFirstName, hr.hrLastName, hr.phone, company.companyId, company.companyName FROM hr INNER JOIN company ON hr.companyId = company.companyId";
+        String query = "SELECT hr.hrId, hr.hrFirstName, hr.hrLastName, hr.phone, hr.hrEmail, company.companyId, company.companyName FROM hr, company";
         int count = 0;                                                  // Used to build the array holding the parameters for query execution.
         Object[] params = new Object[parameters.size()];                // Array of objects holding the parameters for the query execution.
         Set<String> keys = parameters.keySet();                         // Set holding the keys of the Map used to iterate through it and build the array.
         String fullQuery = DBUtils.buildQuery(parameters, query);       // The query which to be used when execute request to the database.
-        fullQuery += " ORDER BY hr.hrFirstName, hr.hrLastName";
+        fullQuery += " AND hr.companyId = company.companyId ORDER BY hr.hrFirstName, hr.hrLastName";
 
         System.out.println("FULL QUERY: " + fullQuery);
 
@@ -232,6 +239,15 @@ public class DBHRQueryHandler implements EntityDbHandler {
                         DBUtils.execQuery(query, params);
                         check = true;
                     }
+
+                    // If we want to modify the email of the HR.
+                    if (operation.equalsIgnoreCase("modifyEmail")) {
+                        String phone = node.get("hrEmail").textValue();
+                        query = "UPDATE hr SET hrEmail = ? WHERE hrId = ?";
+                        params = new Object[]{phone, hrId};
+                        DBUtils.execQuery(query, params);
+                        check = true;
+                    }
                 }
             }
         } catch (JsonProcessingException e) {
@@ -258,10 +274,11 @@ public class DBHRQueryHandler implements EntityDbHandler {
                     String hrFirstName = resultSet.getString("hrFirstName");    // The first name of the HR.
                     String hrLastName = resultSet.getString("hrLastName");      // The last name of the HR.
                     String phone = resultSet.getString("phone");                // The phone of the HR.
+                    String hrEmail = resultSet.getString("hr.hrEmail");         // The email of the HR.
                     String companyName = resultSet.getString("companyName");    // The name of the Company which the HR is working for.
 
                     // Create the HR object, and put it into the List.
-                    HR hr = new HR(hrId, hrFirstName, hrLastName, phone, companyName);
+                    HR hr = new HR(hrId, hrFirstName, hrLastName, phone, hrEmail, companyName);
                     data.add(hr);
                 }
             } catch (SQLException e) {

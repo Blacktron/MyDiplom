@@ -1,22 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>-->
+	<!-- Include Bootstrap and jQuery -->
+	<link rel="import" href="include.html">
 
-	<!-- Include jQuery -->
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-	
 	<!-- Include local JavaScript file -->
-	<script src="app.js"></script>
-
-	<!-- Latest compiled and minified Bootstrap CSS -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-
-	<!-- Optional Bootstrap theme -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
-
-	<!-- Latest compiled and minified Bootstrap JavaScript -->
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+	<script src="formInclude.js"></script>
 
 	<meta charset="UTF-8">
 	<title>Main Page</title>
@@ -32,8 +21,8 @@
 	        <span class="icon-bar"></span>
 	        <span class="icon-bar"></span>
 	      </button>
-	      <a class="navbar-brand" href="#">Brand
-	      	<!-- <img alt="Brand" src="hrd1.jpg"> -->
+	      <a class="navbar-brand" href="#">
+	      	<img alt="Brand" src="logo3.jpg">
 	      </a>
 
 	      <!-- <a class="navbar-brand" href="#">
@@ -46,8 +35,8 @@
 		  <li role="presentation" class="dropdown">
 		    <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Candidates<span class="caret"></span></a>
 		    <ul class="dropdown-menu">
-		      <li><a href="#" title="Add new candidate" id="add-candidate">Add Candidate</a></li>
-		      <li><a href="searchCandidate" title="Search for a candidate">Search Candidate</a></li>
+		      <li><a href="#" title="Add new candidate" id="add-candidate-button">Add Candidate</a></li>
+		      <li><a href="#" title="Search for a candidate" id="search-candidate-button">Search Candidate</a></li>
 		    </ul>
 		  </li>
 
@@ -86,12 +75,8 @@
 	  </div><!-- /.container-fluid -->
 	</nav>
 
-	<div class="row">
-		<div class="col-md-12">
-			<div class="content-container">
-				Test
-			</div>
-		</div>
+	<div class="content-container" style="margin-left: auto; margin-right; auto">
+		<!-- Various content goes here. Example: input forms, search results and etc. -->
 	</div>
 </body>
 </html>

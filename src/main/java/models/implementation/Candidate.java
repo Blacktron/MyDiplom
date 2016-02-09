@@ -12,6 +12,7 @@ public class Candidate extends Entity {
     private String candidateFirstName;          // The first name of the Candidate.
     private String candidateLastName;           // The last name of the Candidate.
     private int age;                            // The age of the Candidate.
+    private String candidateEmail;              // The candidateEmail of the Candidate.
     private List<Experience> experiences;       // The List holding the Technologies and corresponding Experience of the Candidate.
     private List<Position> applications;        // The List holding the Positions for which the Candidate applied.
     private int rating = 0;                     // The rating calculated for each Candidate applied for a selected Position.
@@ -38,20 +39,26 @@ public class Candidate extends Entity {
             int age = Integer.parseInt(node.get("age").textValue());
             setAge(age);
         }
+
+        if (node.has("candidateEmail")) {
+            setCandidateEmail(node.get("candidateEmail").textValue());
+        }
     }
 
     /**
-     * Custom constructor which accepts six parameters. It is used when building the result after search.
+     * Custom constructor which accepts five parameters. It is used when building the result after search.
      * @param candidateId the ID of the Candidate.
      * @param candidateFirstName the first name of the Candidate.
      * @param candidateLastName the last name of the Candidate.
      * @param age the age of the Candidate.
+     * @param candidateEmail the candidateEmail of the Candidate.
      */
-    public Candidate(int candidateId, String candidateFirstName, String candidateLastName, int age) {
+    public Candidate(int candidateId, String candidateFirstName, String candidateLastName, int age, String candidateEmail) {
         setId(candidateId);
         setCandidateFirstName(candidateFirstName);
         setCandidateLastName(candidateLastName);
         setAge(age);
+        setCandidateEmail(candidateEmail);
     }
 
     /**
@@ -100,6 +107,22 @@ public class Candidate extends Entity {
      */
     public void setAge(int age) {
         this.age = age;
+    }
+
+    /**
+     * Shows the candidateEmail of the Candidate.
+     * @return the candidateEmail of the Candidate.
+     */
+    public String getCandidateEmail() {
+        return candidateEmail;
+    }
+
+    /**
+     * Sets the candidateEmail of the Candidate.
+     * @param candidateEmail the candidateEmail of the Candidate.
+     */
+    public void setCandidateEmail(String candidateEmail) {
+        this.candidateEmail = candidateEmail;
     }
 
     /**
@@ -160,7 +183,8 @@ public class Candidate extends Entity {
                 "id='" + id + '\'' +
                 ", candidateFirstName='" + candidateFirstName + '\'' +
                 ", candidateLastName='" + candidateLastName + '\'' +
-                ", age=" + age +
+                ", age=" + age + '\'' +
+                ", candidateEmail=" + candidateEmail +
                 '}';
     }
 }

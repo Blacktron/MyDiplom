@@ -37,8 +37,6 @@ public class DBTechnologyQueryHandler implements EntityDbHandler {
         return DBUtils.execQueryAndBuildResult(query, null, this);
     }
 
-
-
     /**
      * Adds a new Technology to the database.
      * @param node the JSON object holding the data of the Technology.

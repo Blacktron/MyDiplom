@@ -6,6 +6,6 @@ package exceptions;
 public class TechnologyException extends Exception {
 
     public TechnologyException() {
-        super("Unable to get the technologies from the database");
+        super("Unable to get the techs from the database");
     }
 }
