@@ -3,6 +3,7 @@ package db;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javafx.geometry.Pos;
 import models.Entity;
 import models.EntityDbHandler;
 import models.implementation.Candidate;
@@ -20,7 +21,7 @@ import java.util.*;
 /**
  * @Created by Terrax on 10-Dec-2015.
  */
-public class DBPositionQueryHandler implements EntityDbHandler {
+public class DBPositionQueryHandler extends DBUtils implements EntityDbHandler {
     private static DBPositionQueryHandler instance;
 
     private DBPositionQueryHandler() { }
@@ -39,7 +40,7 @@ public class DBPositionQueryHandler implements EntityDbHandler {
      * @throws SQLException
      */
     public List<Entity> getAllEntities() throws SQLException {
-        String query = "SELECT positions.positionId, positions.positionName, positions.hrId, hr.hrFirstName, hr.hrLastName, positions.companyId, company.companyName, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', requirement.years, ' ', requirement.priority ORDER BY positions.positionId SEPARATOR ',') AS 'Requirement', GROUP_CONCAT(DISTINCT candidate.candidateId, ' ', candidate.candidateFirstName, ' ', candidate.candidateLastName, ' ', candidate.age, ' ', candidate.candidateEmail ORDER BY candidate.candidateId SEPARATOR ',') AS 'Applicant' FROM positions, hr, company, requirement, technology, candidate, position_has_candidate WHERE positions.hrId = hr.hrId AND positions.companyId = company.companyId AND requirement.positionId = positions.positionId AND requirement.technologyId = technology.technologyId AND position_has_candidate.candidate_candidateId = candidate.candidateId AND position_has_candidate.position_positionId = positions.positionId GROUP BY positions.positionId ORDER BY positions.positionName";
+        String query = "SELECT positions.positionId, positions.positionName, hr.hrId, hr.hrFirstName, hr.hrLastName, hr.hrEmail, company.companyName, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', requirement.years, ' ', requirement.priority ORDER BY positions.positionId SEPARATOR ',') AS 'Requirement', GROUP_CONCAT(DISTINCT candidate.candidateId, ' ', candidate.candidateFirstName, ' ', candidate.candidateLastName, ' ', candidate.age, ' ', candidate.candidateEmail ORDER BY candidate.candidateId SEPARATOR ',') AS 'Applicant' FROM hr, company, technology, requirement, positions LEFT OUTER JOIN position_has_candidate INNER JOIN candidate ON candidate.candidateId = position_has_candidate.candidateId ON positions.positionId = position_has_candidate.positionId WHERE positions.hrId = hr.hrId AND positions.companyId = company.companyId AND requirement.positionId = positions.positionId AND requirement.technologyId = technology.technologyId GROUP BY positions.positionId ORDER BY positions.positionName";
         return DBUtils.execQueryAndBuildResult(query, null, this);
     }
 
@@ -66,10 +67,10 @@ public class DBPositionQueryHandler implements EntityDbHandler {
             int companyId = position.getCompanyId();
             String positionName = position.getPositionName();
 
-            // TODO: Change this to search by email when email property implemented in the Entity.
             // Check if an HR with such ID exists in the database.
-            String hrQuery = "SELECT hr.hrId FROM hr INNER JOIN company ON hr.companyId = company.companyId WHERE hr.hrId = ? AND hr.companyId = ?";
-            boolean hrExists = DBUtils.isParamExists(hrId, companyId, hrQuery);
+            //String hrQuery = "SELECT hr.hrId FROM hr INNER JOIN company ON hr.companyId = company.companyId WHERE hr.hrId = ? AND hr.companyId = ?";
+            String hrQuery = "SELECT hr.hrId FROM hr WHERE hr.hrId = ?";
+            boolean hrExists = DBUtils.isParamExists(hrId, hrQuery);
 
             // Check if a Company with such ID exists in the database.
 //            String companyQuery = "SELECT hr.companyId" +
@@ -110,7 +111,7 @@ public class DBPositionQueryHandler implements EntityDbHandler {
 
         // Insert the data if the Technology already exists.
         try {
-            JsonNode arrNode = new ObjectMapper().readTree(String.valueOf(node)).get("requirement");
+            JsonNode arrNode = new ObjectMapper().readTree(String.valueOf(node)).get("requirements");
             System.out.println(arrNode.toString());
 
 
@@ -163,8 +164,8 @@ public class DBPositionQueryHandler implements EntityDbHandler {
         String query = "DELETE FROM requirement WHERE positionId = ?";
         DBUtils.execQuery(query, params);
 
-        // Delete the application.
-        query = "DELETE FROM position_has_candidate WHERE position_positionId = ?";
+        // Delete the Application.
+        query = "DELETE FROM position_has_candidate WHERE positionId = ?";
         DBUtils.execQuery(query, params);
 
         // Delete the Position.
@@ -209,14 +210,14 @@ public class DBPositionQueryHandler implements EntityDbHandler {
     }
 
     /**
-     * Search if position with the specified ID exists in the database.
+     * Search if Position with the specified ID exists in the database.
      * @param positionId the ID of the position to be searched.
      * @return the position as object.
      * @throws SQLException
      */
     public Entity searchEntityById(int positionId) throws SQLException {
         Object[] params = {positionId};
-        String query = "SELECT positions.positionId, positions.positionName, positions.hrId, hr.hrFirstName, hr.hrLastName, positions.companyId, company.companyName, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', requirement.years, ' ', requirement.priority ORDER BY positions.positionId SEPARATOR ',') AS 'Requirement', GROUP_CONCAT(DISTINCT candidate.candidateId, ' ', candidate.candidateFirstName, ' ', candidate.candidateLastName, ' ', candidate.age, ' ', candidate.candidateEmail ORDER BY candidate.candidateId SEPARATOR ',') AS 'Applicant' FROM mydb.positions, mydb.hr, mydb.company, mydb.requirement, mydb.technology, mydb.candidate, mydb.position_has_candidate WHERE positions.positionId = ? AND positions.hrId = hr.hrId AND positions.companyId = company.companyId AND requirement.positionId = positions.positionId AND requirement.technologyId = technology.technologyId AND position_has_candidate.candidate_candidateId = candidate.candidateId AND position_has_candidate.position_positionId = positions.positionId GROUP BY positions.positionId ORDER BY positions.positionName";
+        String query = "SELECT positions.positionId, positions.positionName, hr.hrId, hr.hrFirstName, hr.hrLastName, hr.hrEmail, company.companyName, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', requirement.years, ' ', requirement.priority ORDER BY positions.positionId SEPARATOR ',') AS 'Requirement', GROUP_CONCAT(DISTINCT candidate.candidateId, ' ', candidate.candidateFirstName, ' ', candidate.candidateLastName, ' ', candidate.age, ' ', candidate.candidateEmail ORDER BY candidate.candidateId SEPARATOR ',') AS 'Applicant' FROM hr, company, technology, requirement, positions LEFT OUTER JOIN position_has_candidate INNER JOIN candidate ON candidate.candidateId = position_has_candidate.candidateId ON positions.positionId = position_has_candidate.positionId WHERE positions.positionId = ? AND positions.hrId = hr.hrId AND positions.companyId = company.companyId AND requirement.positionId = positions.positionId AND requirement.technologyId = technology.technologyId GROUP BY positions.positionId ORDER BY positions.positionName";
         List<Entity> result = DBUtils.execQueryAndBuildResult(query, params, this);
 
         if (result != null && result.size() > 0) {
@@ -235,12 +236,13 @@ public class DBPositionQueryHandler implements EntityDbHandler {
      */
     public List<Entity> searchPositionByParams(Map<String, String> parameters) throws SQLException {
         // The SELECT and FROM part of the query.
-        String query = "SELECT positions.positionId, positions.positionName, positions.hrId, hr.hrFirstName, hr.hrLastName, positions.companyId, company.companyName, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', requirement.years, ' ', requirement.priority ORDER BY positions.positionId SEPARATOR ',') AS 'Requirement', GROUP_CONCAT(DISTINCT candidate.candidateId, ' ', candidate.candidateFirstName, ' ', candidate.candidateLastName, ' ', candidate.age, ' ', candidate.candidateEmail ORDER BY candidate.candidateId SEPARATOR ',') AS 'Applicant' FROM mydb.positions, mydb.hr, mydb.company, mydb.requirement, mydb.technology, mydb.candidate, mydb.position_has_candidate";
+        String query = "SELECT positions.positionId, positions.positionName, hr.hrId, hr.hrFirstName, hr.hrLastName, hr.hrEmail, company.companyName, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', requirement.years, ' ', requirement.priority ORDER BY positions.positionId SEPARATOR ',') AS 'Requirement', GROUP_CONCAT(DISTINCT candidate.candidateId, ' ', candidate.candidateFirstName, ' ', candidate.candidateLastName, ' ', candidate.age, ' ', candidate.candidateEmail ORDER BY candidate.candidateId SEPARATOR ',') AS 'Applicant' FROM hr, company, technology, requirement, positions LEFT OUTER JOIN position_has_candidate INNER JOIN candidate ON candidate.candidateId = position_has_candidate.candidateId ON positions.positionId = position_has_candidate.positionId";
         int count = 0;                                                      // Used to build the array holding the parameters for query execution.
         Object[] params = new Object[parameters.size()];                    // Array of objects holding the parameters for the query execution.
         Set<String> keys = parameters.keySet();                             // Set holding the keys of the Map used to iterate through it and build the array.
         String fullQuery = DBUtils.buildQuery(parameters, query);           // The query which to be used when execute request to the database.
         fullQuery += " AND positions.hrId = hr.hrId AND positions.companyId = company.companyId AND requirement.positionId = positions.positionId AND requirement.technologyId = technology.technologyId GROUP BY positions.positionId ORDER BY positions.positionName";
+        // " AND positions.hrId = hr.hrId AND positions.companyId = company.companyId AND requirement.positionId = positions.positionId AND requirement.technologyId = technology.technologyId GROUP BY positions.positionId ORDER BY positions.positionName";
 
         System.out.println("fullQuery: " + fullQuery);
 
@@ -275,6 +277,10 @@ public class DBPositionQueryHandler implements EntityDbHandler {
 
         try {
             JsonNode operations = new ObjectMapper().readTree(String.valueOf(node)).get("operations");
+            JsonNode addRequirementsArray = new ObjectMapper().readTree(String.valueOf(node)).get("addRequirement");
+            JsonNode removeRequirementsArray = new ObjectMapper().readTree(String.valueOf(node)).get("removeRequirement");
+            JsonNode addApplicantArray = new ObjectMapper().readTree(String.valueOf(node)).get("addApplicant");
+            JsonNode removeApplicantArray = new ObjectMapper().readTree(String.valueOf(node)).get("removeApplicant");
             System.out.println(operations.toString());
 
             if (operations.isArray() && positionId > 0) {
@@ -285,42 +291,57 @@ public class DBPositionQueryHandler implements EntityDbHandler {
                     // If we want to add new Requirement to a Position.
                     if (operation.equalsIgnoreCase("addRequirement")) {
                         // Check if Technology exists in the database.
-                        technologyId = Integer.parseInt(node.get("technologyId").textValue());
-                        String technologyExistsQuery = "SELECT technologyId FROM technology WHERE technologyId = ?";
-                        boolean technologyExists = DBUtils.isParamExists(technologyId, technologyExistsQuery);
+                        if (addRequirementsArray.isArray()) {
+                            for (JsonNode object : addRequirementsArray) {
+                                technologyId = Integer.parseInt(object.get("technologyId").textValue());
+                                String technologyExistsQuery = "SELECT technologyId FROM technology WHERE technologyId = ?";
+                                boolean technologyExists = DBUtils.isParamExists(technologyId, technologyExistsQuery);
 
-                        // If Technology exists, check if the Position already has such Requirement.
-                        if (technologyExists) {
-                            boolean requirementExists = DBUtils.isParamExists(positionId, technologyId, requirementExistsQuery);
+                                // If Technology exists, check if the Position already has such Requirement.
+                                if (technologyExists) {
+                                    boolean requirementExists = DBUtils.isParamExists(positionId, technologyId, requirementExistsQuery);
 
-                            // Add the Requirement.
-                            if (!requirementExists) {
-                                years = Integer.parseInt(node.get("years").textValue());
-                                priority = Integer.parseInt(node.get("priority").textValue());
-                                query = "INSERT INTO requirement(positionId, technologyId, years, priority) VALUES(?, ?, ?, ?)";
-                                params = new Object[]{positionId, technologyId, years, priority};
-                                DBUtils.execQuery(query, params);
+                                    // Add the Requirement.
+                                    if (!requirementExists) {
+                                        years = Integer.parseInt(object.get("years").textValue());
+                                        priority = Integer.parseInt(object.get("priority").textValue());
+                                        query = "INSERT INTO requirement(positionId, technologyId, years, priority) VALUES(?, ?, ?, ?)";
+                                        params = new Object[]{positionId, technologyId, years, priority};
+                                        DBUtils.execQuery(query, params);
+                                    }
+                                }
+
+                                check = true;
                             }
                         }
-
-                        check = true;
                     }
+
                     // If we want to remove a Requirement from a Position.
-                    else if (operation.equalsIgnoreCase("removeRequirement")) {
+                    if (operation.equalsIgnoreCase("removeRequirement")) {
                         // Check if the Position has such Requirement added.
-                        technologyId = Integer.parseInt(node.get("technologyId").textValue());
-                        boolean positionHasRequirement = DBUtils.isParamExists(positionId, technologyId, requirementExistsQuery);
+                        if (removeRequirementsArray.isArray()) {
+                            for (JsonNode object : removeRequirementsArray) {
+                                String technologyName = object.get("technologyNameToRemove").textValue();
 
-                        if (positionHasRequirement) {
-                            query = "DELETE FROM requirement WHERE positionId = ? AND technologyId = ?";
-                            params = new Object[]{positionId, technologyId};
-                            DBUtils.execQuery(query, params);
+                                // Get the ID of the Technology to remove.
+                                List<Entity> technology = DBTechnologyQueryHandler.getInstance().searchTechnologyByName(technologyName);
+
+                                technologyId = technology.get(0).getId();
+                                boolean positionHasRequirement = DBUtils.isParamExists(positionId, technologyId, requirementExistsQuery);
+
+                                if (positionHasRequirement) {
+                                    query = "DELETE FROM requirement WHERE positionId = ? AND technologyId = ?";
+                                    params = new Object[]{positionId, technologyId};
+                                    DBUtils.execQuery(query, params);
+                                }
+
+                                check = true;
+                            }
                         }
-
-                        check = true;
                     }
+
                     // If we want to modify the years or priority of a Requirement.
-                    else if (operation.equalsIgnoreCase("modifyYears") || operation.equalsIgnoreCase("modifyPriority")) {
+                    if (operation.equalsIgnoreCase("modifyYears") || operation.equalsIgnoreCase("modifyPriority")) {
                         // Check if the Position has such Requirement added.
                         technologyId = Integer.parseInt(node.get("technologyId").textValue());
                         boolean positionHasRequirement = DBUtils.isParamExists(positionId, technologyId, requirementExistsQuery);
@@ -345,11 +366,12 @@ public class DBPositionQueryHandler implements EntityDbHandler {
 
                         check = true;
                     }
-                    // If we want to modify the ID of the HR which is dealing with that Position.
-                    else if (operation.equalsIgnoreCase("modifyHR")) {
+
+                    // If we want to remove HR which is dealing with that Position.
+                    if (operation.equalsIgnoreCase("removeHR")) {
                         // Check if such HR exists.
-                        hrId = Integer.parseInt(node.get("hrId").textValue());
-                        String hrExistsQuery = "SELECT hrId, FROM hr WHERE hrId = ?";
+                        hrId = Integer.parseInt(node.get("removeHRId").textValue());
+                        String hrExistsQuery = "SELECT hrId FROM hr WHERE hrId = ?";
                         boolean hrExists = DBUtils.isParamExists(hrId, hrExistsQuery);
 
                         if (hrExists) {
@@ -360,10 +382,32 @@ public class DBPositionQueryHandler implements EntityDbHandler {
 
                         check = true;
                     }
+
+                    // If we want to Add HR which is dealing with that Position.
+                    if (operation.equalsIgnoreCase("addHR")) {
+                        // Check if such HR exists.
+                        hrId = Integer.parseInt(node.get("newHRId").textValue());
+                        String hrExistsQuery = "SELECT hrId FROM hr WHERE hrId = ?";
+                        boolean hrExists = DBUtils.isParamExists(hrId, hrExistsQuery);
+
+                        if (hrExists) {
+                            query = "UPDATE positions SET hrId = ? WHERE positions.positionId = ?";
+                            params = new Object[]{hrId, positionId};
+                            DBUtils.execQuery(query, params);
+                        }
+
+                        check = true;
+                    }
+
                     // If we want to modify the ID of the Company for which the Position is.
-                    else if (operation.equalsIgnoreCase("modifyCompany")) {
+                    if (operation.equalsIgnoreCase("modifyCompany")) {
                         // Check if such Company exists.
-                        companyId = Integer.parseInt(node.get("companyId").textValue());
+                        String companyName = node.get("companyName").textValue();
+
+                        // Get the ID of the Technology to remove.
+                        List<Entity> company = DBCompanyQueryHandler.getInstance().searchCompanyByName(companyName);
+
+                        companyId = company.get(0).getId();
                         String companyExistsQuery = "SELECT companyId FROM company WHERE companyId = ?";
                         boolean companyExists = DBUtils.isParamExists(companyId, companyExistsQuery);
 
@@ -375,8 +419,9 @@ public class DBPositionQueryHandler implements EntityDbHandler {
 
                         check = true;
                     }
+
                     // If we want to modify the Name of the Position.
-                    else if (operation.equalsIgnoreCase("modifyPositionName")) {
+                    if (operation.equalsIgnoreCase("modifyPositionName")) {
                         // Check if such Position exists.
                         String positionExistsQuery = "SELECT positionId FROM positions WHERE positionId = ?";
                         boolean positionExists = DBUtils.isParamExists(positionId, positionExistsQuery);
@@ -389,6 +434,48 @@ public class DBPositionQueryHandler implements EntityDbHandler {
                         }
 
                         check = true;
+                    }
+
+                    // If we want to add a Position for which the Candidate applied.
+                    if (operation.equalsIgnoreCase("addApplicant")) {
+                        // Check if the Candidate already applied for that Position.
+                        if (addApplicantArray.isArray()) {
+                            for (JsonNode object : addApplicantArray) {
+                                int candidateId = Integer.parseInt(object.get("candidateId").textValue());
+
+                                String candidateApplicationExistsQuery = "SELECT * FROM position_has_candidate WHERE positionId = ? AND candidateId = ?";
+                                boolean candidateApplicationExists = DBUtils.isParamExists(positionId, candidateId, candidateApplicationExistsQuery);
+
+                                if (!candidateApplicationExists) {
+                                    query = "INSERT INTO position_has_candidate(positionId, candidateId) VALUES(?, ?)";
+                                    params = new Object[]{positionId, candidateId};
+                                    DBUtils.execQuery(query, params);
+                                }
+
+                                check = true;
+                            }
+                        }
+                    }
+
+                    // If we want to remove a Position for which the Candidate applied.
+                    if (operation.equalsIgnoreCase("removeApplicant")) {
+                        // Check if the Candidate applied for that Position.
+                        if (removeApplicantArray.isArray()) {
+                            for (JsonNode object : removeApplicantArray) {
+                                int candidateId = Integer.parseInt(object.get("candidateId").textValue());
+
+                                String candidateApplicationExistsQuery = "SELECT * FROM position_has_candidate WHERE positionId = ? AND candidateId = ?";
+                                boolean candidateApplicationExists = DBUtils.isParamExists(positionId, candidateId, candidateApplicationExistsQuery);
+
+                                if (candidateApplicationExists) {
+                                    query = "DELETE FROM position_has_candidate WHERE positionId = ? AND candidateId = ?";
+                                    params = new Object[]{positionId, candidateId};
+                                    DBUtils.execQuery(query, params);
+                                }
+
+                                check = true;
+                            }
+                        }
                     }
                 }
             }
@@ -415,7 +502,44 @@ public class DBPositionQueryHandler implements EntityDbHandler {
 
         try {
             connection = DBConnectionHandler.openDatabaseConnection();
-            String query = "SELECT positions.positionId, positions.positionName, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', requirement.years, ' ', requirement.priority ORDER BY requirement.years SEPARATOR ',') AS 'Requirements', GROUP_CONCAT(DISTINCT candidate.candidateId, ' ', candidate.candidateFirstName, ' ', candidate.candidateLastName, ' ', candidate.age, ' ', candidate.candidateEmail, ' ', technology.technologyName, ' ', experience.years ORDER BY candidate.candidateId) AS 'Candidates' FROM mydb.positions, mydb.candidate, mydb.technology, mydb.experience, mydb.requirement, mydb.position_has_candidate WHERE positions.positionId = ? AND positions.positionId = position_has_candidate.position_positionId AND candidate.candidateId = position_has_candidate.candidate_candidateId AND requirement.technologyId = technology.technologyId AND candidate.candidateId = experience.candidateId AND technology.technologyId = experience.technologyId GROUP BY positions.positionName;";
+            //String query = "SELECT positions.positionId, positions.positionName, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', requirement.years, ' ', requirement.priority ORDER BY requirement.years SEPARATOR ',') AS 'Requirements', GROUP_CONCAT(DISTINCT candidate.candidateId, ' ', candidate.candidateFirstName, ' ', candidate.candidateLastName, ' ', candidate.age, ' ', candidate.candidateEmail, ' ', technology.technologyName, ' ', experience.years ORDER BY candidate.candidateId) AS 'Candidates' FROM positions, candidate, technology, experience, requirement, position_has_candidate WHERE positions.positionId = ? AND positions.positionId = position_has_candidate.positionId AND candidate.candidateId = position_has_candidate.candidateId AND requirement.technologyId = technology.technologyId AND requirement.positionId = positions.positionId AND technology.technologyId = experience.technologyId GROUP BY positions.positionName";
+            String query = "SELECT position.positionId, " +
+                                    "position.positionName, " +
+                                    "phc.candidateId, " +
+                                    "candidates.candidateFirstName, " +
+                                    "candidates.candidateLastName, " +
+                                    "candidates.age, " +
+                                    "candidates.candidateEmail, " +
+                                    "candidates.experience AS Experience, " +
+                                    "candidates.years AS Years, " +
+                                    "position.technologyId, " +
+                                    "position.technologyName AS Requirements, " +
+                                    "position.years AS ReqYears, " +
+                                    "position.priority AS Priority " +
+                                "FROM position_has_candidate phc " +
+                                    "INNER JOIN (SELECT candidate.candidateId AS candidateId, " +
+                                                        "candidate.candidateFirstName AS candidateFirstName, " +
+                                                        "candidate.candidateLastName AS candidateLastName, " +
+                                                        "candidate.candidateEmail AS candidateEmail, " +
+                                                        "candidate.age AS age, " +
+                                                        "GROUP_CONCAT(technology.technologyName) AS experience, " +
+                                                        "GROUP_CONCAT(experience.years) AS years " +
+                                                "FROM candidate " +
+                                                    "INNER JOIN experience ON experience.candidateId = candidate.candidateId " +
+                                                    "INNER JOIN technology ON technology.technologyId = experience.technologyId " +
+                                                "GROUP BY candidate.candidateId) AS candidates ON phc.candidateId = candidates.candidateId " +
+                                    "INNER JOIN (SELECT positions.positionId AS positionId, " +
+                                                        "positions.positionName AS positionName, " +
+                                                        "GROUP_CONCAT(technology.technologyId) AS technologyId, " +
+                                                        "GROUP_CONCAT(technology.technologyName) AS technologyName, " +
+                                                        "GROUP_CONCAT(requirement.years) AS years, " +
+                                                        "GROUP_CONCAT(requirement.priority) AS priority " +
+                                                "FROM positions " +
+                                                    "INNER JOIN requirement ON positions.positionId = requirement.positionId " +
+                                                    "INNER JOIN technology ON technology.technologyId = requirement.technologyId " +
+                                                "GROUP BY positions.positionId) AS position ON phc.positionId = position.positionId " +
+                           "WHERE position.positionId = ?";
+
             List<Entity> matches;       // The List holding the data returned from the database.
 
             if (connection != null) {
@@ -456,11 +580,12 @@ public class DBPositionQueryHandler implements EntityDbHandler {
             try {
                 while (resultSet.next()) {
                     int positionId = resultSet.getInt("positionId");                            // The ID of the Position.
-//                    int hrId = resultSet.getInt("hrId");                                        // The ID of the HR which is responsible for the Position.
+                    int hrId = resultSet.getInt("hrId");                                        // The ID of the HR which is responsible for the Position.
 //                    int companyId = resultSet.getInt("companyId");                              // The ID of the Company for which the Position is opened.
                     String positionName = resultSet.getString("positionName");                  // The name of the Position.
                     String hrFirstName = resultSet.getString("hrFirstName");                    // The first name of the HR.
                     String hrLastName = resultSet.getString("hrLastName");                      // The last name of the HR.
+                    String hrEmail = resultSet.getString("hrEmail");                            // The email of the HR.
                     String companyName = resultSet.getString("companyName");                    // The name of the Company.
                     String requirementStr = resultSet.getString("Requirement");                 // The string holding the details of the Requirements.
                     String applicantStr = resultSet.getString("Applicant");                     // The string holding the details of the applicant.
@@ -483,23 +608,25 @@ public class DBPositionQueryHandler implements EntityDbHandler {
                     }
 
                     // Get the applicant as group.
-                    String[] applicantGroups = applicantStr.split(",");
-                    for (String applicantGroup : applicantGroups) {
-                        // Get the details for each applicant (ID, first name, last name and age).
-                        String[] applicantData = applicantGroup.split(" ");
+                    if (applicantStr != null) {
+                        String[] applicantGroups = applicantStr.split(",");
+                        for (String applicantGroup : applicantGroups) {
+                            // Get the details for each applicant (ID, first name, last name and age).
+                            String[] applicantData = applicantGroup.split(" ");
 
-                        int candidateId = Integer.parseInt(applicantData[0]);   // The ID of the Candidate which applied for the position.
-                        String candidateFirstName = applicantData[1];           // The first name of the Candidate.
-                        String candidateLastName = applicantData[2];            // The last name of the Candidate.
-                        int age = Integer.parseInt(applicantData[3]);           // The age of the Candidate.
-                        String candidateEmail = applicantData[4];               // The email of the Candidate.
+                            int candidateId = Integer.parseInt(applicantData[0]);   // The ID of the Candidate which applied for the position.
+                            String candidateFirstName = applicantData[1];           // The first name of the Candidate.
+                            String candidateLastName = applicantData[2];            // The last name of the Candidate.
+                            int age = Integer.parseInt(applicantData[3]);           // The age of the Candidate.
+                            String candidateEmail = applicantData[4];               // The email of the Candidate.
 
-                        Candidate candidate = new Candidate(candidateId, candidateFirstName, candidateLastName, age, candidateEmail);
-                        candidateApplicant.add(candidate);
+                            Candidate candidate = new Candidate(candidateId, candidateFirstName, candidateLastName, age, candidateEmail);
+                            candidateApplicant.add(candidate);
+                        }
                     }
 
                     // Create the Position object, set its Requirements and put it into the List.
-                    Position position = new Position(positionId, positionName, hrFirstName, hrLastName, companyName);
+                    Position position = new Position(positionId, positionName, hrId, hrFirstName, hrLastName, hrEmail, companyName);
                     position.setRequirements(positionRequirement);
                     position.setApplicants(candidateApplicant);
                     data.add(position);
@@ -519,86 +646,66 @@ public class DBPositionQueryHandler implements EntityDbHandler {
      */
     public List<Entity> buildRatingData(ResultSet resultSet) {
         List<Entity> data = new ArrayList<Entity>();
+        ArrayList<Requirement> positionRequirement = new ArrayList<Requirement>();            // The List holding all details of the Requirement for a Position.
 
         if (resultSet != null) {
             try {
                 while (resultSet.next()) {
                     Candidate candidate;
                     Experience experience;
-                    int positionId = resultSet.getInt("positionId");                             // The ID of the Position.
-                    String positionName = resultSet.getString("positionName");                   // The name of the Position.
-                    String requirementStr = resultSet.getString("Requirements");                 // The string holding the details of the Requirements.
-                    String applicantStr = resultSet.getString("Candidates");                     // The string holding the details of the applicant.
+                    int positionId = resultSet.getInt("positionId");                            // The ID of the Position.
+                    String positionName = resultSet.getString("positionName");                  // The name of the Position.
+                    int candidateId = resultSet.getInt("candidateId");                          // The ID of the Candidate which applied for the position.
+                    String candidateFirstName = resultSet.getString("candidateFirstName");      // The first name of the Candidate.
+                    String candidateLastName = resultSet.getString("candidateLastName");        // The last name of the Candidate.
+                    int age = resultSet.getInt("age");                                          // The age of the Candidate.
+                    String candidateEmail = resultSet.getString("candidateEmail");              // The email of the Candidate.
+                    String candidateExpStr = resultSet.getString("Experience");                 // The string holding the names of the technologies the candidate has experience with.
+                    String candidateYearsStr = resultSet.getString("Years");                    // The string holding the candidate's years of experience with the technologies.
+                    String requirementStr = resultSet.getString("Requirements");                // The string holding the names of the technologies the position requires experience with.
+                    String requirementYearsStr = resultSet.getString("ReqYears");               // The string holding the years of experience with a technology that the position requires.
+                    String requirementPriorityStr = resultSet.getString("Priority");            // The string holding the priority of the requirement.
 
-                    ArrayList<Requirement> positionRequirement = new ArrayList<Requirement>();          // The List holding all details of the Requirement for a Position.
+                    //System.out.println("REEEEEEEEEEEEEEEEEEEEE: " + requirementStr);
+
                     ArrayList<Candidate> candidateApplicant = new ArrayList<Candidate>();               // The List holding all details for the Candidate applied for the Position.
 
-                    // Get the Requirements as group.
-                    String[] requirementGroups = requirementStr.split(",");
-                    for (String requirementGroup : requirementGroups) {
-                        // Get the details for each Requirement (Technology, years and priority).
-                        String[] requirementData = requirementGroup.split(" ");
+                    // Get the details of the Position Requirements.
+                    if (data.size() == 0 || (data.get(data.size() - 1).getId() != positionId)) {
+                        String[] requirementTech = requirementStr.split(",");
+                        String[] requirementYears = requirementYearsStr.split(",");
+                        String[] requirementPriority = requirementPriorityStr.split(",");
+                        for (int i = 0; i < requirementTech.length; i ++) {
+                            // Get the details for each Requirement (Technology, years and priority).
 
-                        String technologyName = requirementData[0];             // The name of the Technology which is required for the Position.
-                        int years = Integer.parseInt(requirementData[1]);       // The years of experience with certain Technology required for the Position.
-                        int priority = Integer.parseInt(requirementData[2]);    // The priority of the Requirement for the Position.
+                            String technologyName = requirementTech[i];                 // The name of the Technology which is required for the Position.
+                            int years = Integer.parseInt(requirementYears[i]);          // The years of experience with certain Technology required for the Position.
+                            int priority = Integer.parseInt(requirementPriority[i]);    // The priority of the Requirement for the Position.
 
-                        Requirement requirement = new Requirement(positionId, technologyName, years, priority);
-                        positionRequirement.add(requirement);
+                            Requirement requirement = new Requirement(positionId, technologyName, years, priority);
+                            positionRequirement.add(requirement);
+                        }
                     }
 
-                    // Get the applicant as group.
+                    // Get the details of each candidate.
+                    String[] candidateExp = candidateExpStr.split(",");
+                    String[] candidateExpYears = candidateYearsStr.split(",");
                     ArrayList<Experience> candidateExperience = new ArrayList<Experience>();
-                    String[] applicantGroups = applicantStr.split(",");
-                    for (String applicantGroup : applicantGroups) {
-                        // Get the details for each applicant (ID, first name, last name and age).
-                        String[] applicantData = applicantGroup.split(" ");
 
-                        int candidateId = Integer.parseInt(applicantData[0]);   // The ID of the Candidate which applied for the position.
-                        String candidateFirstName = applicantData[1];           // The first name of the Candidate.
-                        String candidateLastName = applicantData[2];            // The last name of the Candidate.
-                        int age = Integer.parseInt(applicantData[3]);           // The age of the Candidate.
-                        String candidateEmail = applicantData[4];               // The email of the Candidate.
-                        String technologyName = applicantData[5];               // The name of the Technology.
-                        int years = Integer.parseInt(applicantData[6]);         // The years of experience the Candidate has with that Technology.
+                    candidate = new Candidate(candidateId, candidateFirstName, candidateLastName, age, candidateEmail);
 
-                        /*
-                            If there are no Candidates in the List yet of if the lastly created Candidate
-                            is different from the newly one which to be created - create the Candidate and
-                            its Experience and add it to the List.
-                        */
-                        if (candidateApplicant.size() == 0 || candidateId != candidateApplicant.get(candidateApplicant.size() - 1).getId()) {
-                            candidate = new Candidate(candidateId, candidateFirstName, candidateLastName, age, candidateEmail);
-                            experience = new Experience();
-                            experience.setTechnologyName(technologyName);
-                            experience.setYears(years);
-                            candidateExperience.add(experience);
-                            candidate.setExperiences(candidateExperience);
-                            candidateApplicant.add(candidate);
-                        }
-                        /*
-                            If there is data to be added for the lastly created Candidate, append the Experience to him.
-                            This works because the Candidates are ordered by ID.
-                         */
-                        else if (candidateId == candidateApplicant.get(candidateApplicant.size() - 1).getId()) {
-                            candidate = candidateApplicant.get(candidateApplicant.size() - 1);
-                            candidateExperience = (ArrayList<Experience>) candidate.getExperiences();
-                            experience = new Experience();
-                            experience.setTechnologyName(technologyName);
-                            experience.setYears(years);
-                            candidateExperience.add(experience);
-                            candidate.setExperiences(candidateExperience);
-                        }
-//                        else {
-//                            candidate = new Candidate(candidateId, candidateFirstName, candidateLastName, age, candidateEmail);
-//                            experience = new Experience();
-//                            experience.setTechnologyName(technologyName);
-//                            experience.setYears(years);
-//                            candidateExperience.add(experience);
-//                            candidate.setExperiences(candidateExperience);
-//                            candidateApplicant.add(candidate);
-//                        }
+                    for (int i = 0; i < candidateExp.length; i ++) {
+                        String technologyName = candidateExp[i];                // The name of the Technology.
+                        int years = Integer.parseInt(candidateExpYears[i]);     // The years of experience the Candidate has with that Technology.
+
+                        experience = new Experience();
+                        experience.setTechnologyName(technologyName);
+                        experience.setYears(years);
+                        candidateExperience.add(experience);
                     }
+
+                    candidate.setExperiences(candidateExperience);
+                    candidateApplicant.add(candidate);
 
                     // Create the Position object, set its Requirements and put it into the List.
                     Position position = new Position();

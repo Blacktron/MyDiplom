@@ -1,0 +1,105 @@
+<!-- Include local JavaScript file -->
+<script src="../formInclude.js"></script>
+<script src="../positionActions.js"></script>
+<script type="text/javascript">
+    /*
+     On page load
+     - get the Technologies from the database and store them in the global variable 'technologies'.
+     - get the HRs from the database and store them in the global variable 'hrs'.
+     - get the Companies from the database and store them in the global variable 'positionCompanies'.
+     */
+
+    $(function() {
+        // Get the Technologies.
+        $.ajax({
+            method: 'GET',
+            url: '/rest/technologies',
+            success: function (data) {
+                technologies = data;
+            },
+            error: function (data) {
+                alert(data);
+            }
+        });
+
+        // Get the HRs.
+        $.ajax({
+            method: 'GET',
+            url: '/rest/hrs',
+            success: function (data) {
+                hrs = data;
+            },
+            error: function (data) {
+                alert(data);
+            }
+        });
+
+        // Get the Companies.
+        $.ajax({
+            method: 'GET',
+            url: '/rest/companies',
+            success: function (data) {
+                positionCompanies = data;
+            },
+            error: function (data) {
+                alert(data);
+            }
+        });
+    });
+</script>
+
+<form class="form-horizontal">
+    <div class="form-group">
+        <label for="position-name" class="col-sm-2 control-label">Position Name</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="position-name" placeholder="Position Name" maxlength="50" required>
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="position-company-container">
+        <div id="position-company-list">
+            <!-- Company fields go here. -->
+        </div>
+    </div>
+
+    <!-- Add Company button. -->
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-9">
+            <button type="button" class="btn btn-success" id="add-position-company-button">Add Company</button>
+        </div>
+    </div>
+
+    <div class="position-hr-container">
+        <div id="position-hr-list">
+            <!-- HR fields go here. -->
+        </div>
+    </div>
+
+    <!-- Add HR button. -->
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-9">
+            <button type="button" class="btn btn-success" id="add-position-hr-button">Add HR</button>
+        </div>
+    </div>
+
+    <div class="position-requirement-container">
+        <div id="position-requirement-list">
+            <!-- HR fields go here. -->
+        </div>
+    </div>
+
+    <!-- Add Requirement button. -->
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-9">
+            <button type="button" class="btn btn-success" id="add-position-requirement-button">Add Requirement</button>
+        </div>
+    </div>
+
+    <!-- Add Position button. -->
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-success" onclick="addPosition()">Add Position</button>
+        </div>
+    </div>
+</form>

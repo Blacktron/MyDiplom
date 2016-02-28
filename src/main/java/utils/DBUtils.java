@@ -56,17 +56,6 @@ public class DBUtils {
                         } else {
                             statement.setString(i + 1, "%" + param + "%");
                         }
-
-//                        if (param instanceof Integer) {
-//                            System.out.println("INSTANCEOF");
-//                            Integer parameter = (Integer) params[i];
-//
-//                            //if (!parameter.contains(".")) {
-//
-//                            //}
-//                        } else {
-//
-//                        }
                     }
                 }
 
@@ -95,8 +84,7 @@ public class DBUtils {
     }
 
     /**
-     * Method which makes a connection to the database, executes a query and builds a List with the
-     * result returned from the database.
+     * Method which makes a connection to the database and executes a query.
      * @param query the query which to be executed.
      * @param params the parameters which will be used for the query.
      * @throws SQLException
@@ -120,7 +108,6 @@ public class DBUtils {
                 // Execute the query.
                 statement.execute();
             }
-
         } finally {
             if (statement != null) {
                 statement.close();
@@ -273,7 +260,7 @@ public class DBUtils {
         for (String key : parameters.keySet()) {
             where.append(" ");
             where.append(key);
-            if (key.toLowerCase().contains("name")) {
+            if (key.toLowerCase().contains("name") || key.toLowerCase().contains("email")) {
                 where.append(" LIKE ?");
             } else {
                 where.append(" = ?");
@@ -287,13 +274,4 @@ public class DBUtils {
 
         return query + where.toString();
     }
-
-    /**
-     * Method which builds the WHERE part of the query.
-     * @param parameters the parameters to search for.
-     * @return the full query.
-     */
-//    public static String buildWherePart(Map<String, String> parameters) {
-//
-//    }
 }

@@ -9,8 +9,7 @@ import utils.DBUtils;
 import javax.ws.rs.core.MultivaluedMap;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @Created by Terrax on 27-Nov-2015.
@@ -52,7 +51,7 @@ public class DBCompanyQueryHandler implements EntityDbHandler {
         String companyExistsQuery = "SELECT companyId FROM company WHERE companyName = ?";
         boolean companyExists = DBUtils.isParamExists(companyName, companyExistsQuery);
 
-        // If there is no such Technology in the database, prepare the query and execute it.
+        // If there is no such Company in the database, prepare the query and execute it.
         if (!companyExists) {
             String query = "INSERT INTO company(companyName) VALUES(?)";
             Object[] params = {companyName};
@@ -81,19 +80,31 @@ public class DBCompanyQueryHandler implements EntityDbHandler {
      * @throws SQLException
      */
     public List<Entity> searchEntity(MultivaluedMap<String, String> data) throws SQLException {
-        String companyName = "";
-        List<Entity> result = null;
+        int searchParametersCount = data.size();
+        String companyName;
+        List<Entity> result;
 
         // Check which parameters exist in the query.
-        if (data.containsKey("companyName")) {
-            companyName = data.getFirst("companyName");
-        }
-
-        if (companyName == null || companyName.equals("")) {
+        if (searchParametersCount == 0) {
+            // If there are no parameters provided - show all entries in the database.
             result = this.getAllEntities();
-        }
-        if (companyName != null && !companyName.equals("")) {
+        } else if (searchParametersCount == 1 && data.containsKey("companyName")) {
+            companyName = data.getFirst("companyName");
             result = searchCompanyByName(companyName);
+        } else {
+            /*
+                Make a Map holding the keys and their corresponding values.
+                Pass the Map as parameter to a method which dynamically builds a query based on the
+                existing parameters.
+             */
+            Map<String, String> parameters = new HashMap<String, String>();
+
+            for (String key : data.keySet()) {
+                String value = data.getFirst(key);
+                parameters.put(key, value);
+            }
+
+            result = this.searchCompanyByParams(parameters);
         }
 
         return result;
@@ -124,10 +135,34 @@ public class DBCompanyQueryHandler implements EntityDbHandler {
      * @return the Company as object.
      * @throws SQLException
      */
-    private List<Entity> searchCompanyByName(String name) throws SQLException {
+    public List<Entity> searchCompanyByName(String name) throws SQLException {
         Object[] params = {name};
         String query = "SELECT * FROM company WHERE companyName LIKE ?";
         return DBUtils.execQueryAndBuildResult(query, params, this);
+    }
+
+    /**
+     * Method which searches for entries based on the provided parameters.
+     * @param parameters the parameters to search for.
+     * @return a List holding the result of the search.
+     * @throws SQLException
+     */
+    public List<Entity> searchCompanyByParams(Map<String, String> parameters) throws SQLException {
+        // The SELECT and FROM part of the query.
+        String query = "SELECT * FROM company";
+        int count = 0;                                                  // Used to build the array holding the parameters for query execution.
+        Object[] params = new Object[parameters.size()];                // Array of objects holding the parameters for the query execution.
+        Set<String> keys = parameters.keySet();                         // Set holding the keys of the Map used to iterate through it and build the array.
+        String fullQuery = DBUtils.buildQuery(parameters, query);       // The query which to be used when execute request to the database.
+
+        System.out.println("FULL QUERY: " + fullQuery);
+
+        for (String key : keys) {
+            params[count] = parameters.get(key);
+            count++;
+        }
+
+        return DBUtils.execQueryAndBuildResult(fullQuery, params, this);
     }
 
     /**
@@ -144,13 +179,13 @@ public class DBCompanyQueryHandler implements EntityDbHandler {
         String query;
         Object[] params;
 
-        // If we want to edit the name of a Technology.
+        // If we want to edit the name of a Company.
         if (operation.equalsIgnoreCase("modifyCompany")) {
             // Check if such Company exists in the database.
             String companyExistsQuery = "SELECT companyId FROM company WHERE companyId = ?";
             boolean companyExists = DBUtils.isParamExists(companyId, companyExistsQuery);
 
-            // Update the Technology.
+            // Update the Company.
             if (companyExists) {
                 String companyName = node.get("companyName").textValue();
                 query = "UPDATE company SET companyName = ? WHERE companyId = ?";

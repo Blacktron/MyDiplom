@@ -1,0 +1,48 @@
+<!-- Include local JavaScript file -->
+<script src="../positionActions.js"></script>
+<script type="text/javascript">
+    /*
+        On page load get the Positions from the database and store them in the global variable 'positionsMatch'.
+     */
+    $(function() {
+        $.get("/position/addPositions.html", function (data) {
+            $('#positions-list').append(data);
+        });
+
+        // Get the Positions.
+        $.ajax({
+            method: 'GET',
+            url: '/rest/positions',
+            success: function (data) {
+                positionsMatch = data;
+                populatePositionsMatchOn($('.positions-select-container'));
+            },
+            error: function (data) {
+                alert(data);
+            }
+        });
+    });
+</script>
+
+<form class="form-horizontal">
+    <div class="positions-container">
+        <div id="positions-list">
+            <!-- Position fields go here. -->
+        </div>
+    </div>
+
+    <!-- Search database button. -->
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-info" onclick="searchMatch()">Search Match</button>
+        </div>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-hover" id="search-match-result-table">
+        <tr>
+            <th>Candidate ID</th> <th>First Name</th> <th>Last Name</th> <th>Age</th> <th>Email</th> <th>Score</th>
+        </tr>
+    </table>
+</div>

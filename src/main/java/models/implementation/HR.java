@@ -1,16 +1,18 @@
 package models.implementation;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import models.Entity;
 
 /**
  * @Created by Terrax on 13-Sep-2015.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class HR extends Entity {
     private String hrFirstName;     // The first name of the HR.
     private String hrLastName;      // The last name of the HR.
     private String phone;           // The phone of the HR.
-    private String hrEmail;           // The hrEmail of the HR.
+    private String hrEmail;         // The hrEmail of the HR.
     private int companyId;          // The Company ID which the HR is working for.
     private String companyName;     // The name of the Company which the HR is working for.
 

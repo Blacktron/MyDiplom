@@ -1,0 +1,67 @@
+<!-- Include local JavaScript file -->
+<script src="../technologyActions.js"></script>
+
+<form class="form-horizontal">
+    <div class="form-group">
+        <label for="technology-ID" class="col-sm-2 control-label">Technology ID</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="technology-ID" placeholder="Technology ID" maxlength="4">
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="technology-name" class="col-sm-2 control-label">Technology Name</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="technology-name" placeholder="Technology Name" maxlength="50">
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <!-- Search database button. -->
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-info" onclick="searchTechnology()">Search Candidate</button>
+        </div>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-hover" id="search-result-table">
+        <tr>
+            <th>ID</th> <th>Technology Name</th>
+        </tr>
+    </table>
+</div>
+
+<div class="modal fade" id="technologyModal" tabindex="-1" role="dialog" aria-labelledby="technologyModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="technologyModalLabel">Edit Technology</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label for="dialog-technology-ID" class="col-sm-4 control-label">Technology ID</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="dialog-technology-ID" placeholder="Technology ID" maxlength="4" disabled="disabled">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dialog-technology-name" class="col-sm-4 control-label">Technology Name</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="dialog-technology-name" placeholder="Technology Name" maxlength="50">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="save-technology-changes-button" data-dismiss="modal">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>

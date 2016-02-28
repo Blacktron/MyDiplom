@@ -1,0 +1,76 @@
+<!-- Include local JavaScript file -->
+<script src="../formInclude.js"></script>
+<script src="../hrActions.js"></script>
+<script type="text/javascript">
+    /*
+     On page load get the Companies from the database and store them in the global variable 'companies'.
+     */
+
+    $(function() {
+        // Get the Companies.
+        $.ajax({
+            method: 'GET',
+            url: '/rest/companies',
+            success: function (data) {
+                companies = data;
+            },
+            error: function (data) {
+                alert(data);
+            }
+        });
+    });
+</script>
+
+<form class="form-horizontal">
+    <div class="form-group">
+        <label for="hr-first-name" class="col-sm-2 control-label">First Name</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="hr-first-name" placeholder="First Name" maxlength="50" required>
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="hr-last-name" class="col-sm-2 control-label">Last Name</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="hr-last-name" placeholder="Last Name" maxlength="50" required>
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="hr-phone" class="col-sm-2 control-label">Phone</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="hr-phone" placeholder="Phone" maxlength="100" required>
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="hr-email" class="col-sm-2 control-label">Email</label>
+        <div class="col-sm-4">
+            <input type="email" class="form-control" id="hr-email" placeholder="Email" maxlength="100" required>
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="company-container">
+        <div id="company-list">
+            <!-- Company fields go here. -->
+        </div>
+    </div>
+
+    <!-- Add Company button. -->
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-9">
+            <button type="button" class="btn btn-success" id="add-hr-company-button">Add Company</button>
+        </div>
+    </div>
+
+    <!-- Add HR button. -->
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-success" onclick="addHR()">Add HR</button>
+        </div>
+    </div>
+</form>

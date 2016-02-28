@@ -1,0 +1,192 @@
+<!-- Include local JavaScript file -->
+<script src="../candidateActions.js"></script>
+<script type="text/javascript">
+    /*
+     On page load
+     - get the Technologies from the database and store them in the global variable 'techs'.
+     - get the Positions from the database and store them in the global variable 'positions'.
+     */
+
+    $(function() {
+        // Get the Technologies.
+        $.ajax({
+            method: 'GET',
+            url: '/rest/technologies',
+            success: function (data) {
+                techs = data;
+            },
+            error: function (data) {
+                alert(data);
+            }
+        });
+
+        // Get the Positions.
+        $.ajax({
+            method: 'GET',
+            url: '/rest/positions',
+            success: function (data) {
+                positions = data;
+            },
+            error: function (data) {
+                alert(data);
+            }
+        });
+    });
+</script>
+<form class="form-horizontal">
+    <div class="form-group">
+        <label for="candidate-ID" class="col-sm-2 control-label">Candidate ID</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="candidate-ID" placeholder="Candidate ID" maxlength="4">
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="candidate-first-name" class="col-sm-2 control-label">First Name</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="candidate-first-name" placeholder="First Name" maxlength="50">
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="candidate-last-name" class="col-sm-2 control-label">Last Name</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="candidate-last-name" placeholder="Last Name" maxlength="50">
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="candidate-age" class="col-sm-2 control-label">Age</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="candidate-age" placeholder="Age" maxlength="2">
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="candidate-email" class="col-sm-2 control-label">Email</label>
+        <div class="col-sm-4">
+            <input type="email" class="form-control" id="candidate-email" placeholder="Email" maxlength="100">
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="candidate-technology" class="col-sm-2 control-label">Technology</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="candidate-technology" placeholder="Technology" maxlength="100">
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="candidate-years" class="col-sm-2 control-label">Years</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="candidate-years" placeholder="Years" maxlength="2">
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <!-- Search database button. -->
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-info" onclick="searchCandidate()">Search Candidate</button>
+        </div>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-hover" id="search-result-table">
+        <tr>
+            <th>ID</th> <th>First Name</th> <th>Last Name</th> <th>Age</th> <th>Email</th> <th>Experience</th> <th>Applications</th>
+        </tr>
+    </table>
+</div>
+
+<div class="modal fade" id="candidateModal" tabindex="-1" role="dialog" aria-labelledby="candidateModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="candidateModalLabel">Edit Candidate</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label for="dialog-candidate-ID" class="col-sm-4 control-label">Candidate ID</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="dialog-candidate-ID" placeholder="Candidate ID" maxlength="4" disabled="disabled">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dialog-candidate-first-name" class="col-sm-4 control-label">First Name</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="dialog-candidate-first-name" placeholder="First Name" maxlength="50">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dialog-candidate-last-name" class="col-sm-4 control-label">Last Name</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="dialog-candidate-last-name" placeholder="Last Name" maxlength="50">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dialog-candidate-age" class="col-sm-4 control-label">Age</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="dialog-candidate-age" placeholder="Age" maxlength="2">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dialog-candidate-email" class="col-sm-4 control-label">Email</label>
+                        <div class="col-sm-8">
+                            <input type="email" class="form-control" id="dialog-candidate-email" placeholder="Email" maxlength="100">
+                        </div>
+                    </div>
+
+                    <div align="center">
+                        <p><b>Experience</b></p>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="experience-table">
+                            <tr>
+                                <th>Technology</th> <th>Years</th> <th></th>
+                            </tr>
+                        </table>
+                        <div class="dialog-experience-list">
+                            <!-- Add Experience fields appear here. -->
+                        </div>
+                        <button type="button" class="btn btn-success" id="dialog-add-experience-button">Add Experience</button>
+                    </div>
+
+                    <div align="center">
+                        <p><b>Applications</b></p>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="application-table">
+                            <tr>
+                                <th>Position</th> <th>Company</th> <th></th>
+                            </tr>
+                        </table>
+                        <div class="dialog-application-list">
+                            <!-- Add Application fields appear here. -->
+                        </div>
+                        <button type="button" class="btn btn-success" id="dialog-add-application-button">Add Application</button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="close-candidate-changes-button" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="save-candidate-changes-button" data-dismiss="modal">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>

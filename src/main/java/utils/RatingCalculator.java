@@ -5,6 +5,7 @@ import models.implementation.Experience;
 import models.implementation.Position;
 import models.implementation.Requirement;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -37,8 +38,11 @@ public class RatingCalculator {
     }
 
     public void getRequirementPrioritiesOfPosition() {
+        //System.out.println("Requirements count: " + requirements.size());
         for (Requirement requirement : requirements) {
+            //System.out.println("Req priority: " + requirement.getPriority());
             priorityCount[requirement.getPriority() - 1]++;
+            //System.out.println("Priority counts: " + Arrays.toString(priorityCount));
         }
     }
 
@@ -81,6 +85,7 @@ public class RatingCalculator {
     public void calculatePoints() {
         getRequirementPrioritiesOfPosition();
         makeTheShares();
+        //System.out.println("hi: " + highShare + "me: " + medShare + "lo: " + lowShare);
         List<Candidate> candidates = position.getApplicants();
 
         for (Candidate candidate : candidates) {
@@ -100,7 +105,8 @@ public class RatingCalculator {
                     int lowReqPoints;
 
                     if (technologyName.equals(candidateTechExp)) {
-                        System.out.println("REQUIREMENT == EXPERIENCE");
+                        //System.out.println("REQUIREMENT == EXPERIENCE");
+                        //System.out.println(technologyName + " " + candidateTechExp);
                         if (priority == 1) {
                             highReqPoints = highShare / priorityCount[0];
                             //rating += ((highReqPoints / years) * candidateYearsExp) / years;

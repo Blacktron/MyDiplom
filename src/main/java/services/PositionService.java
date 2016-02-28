@@ -63,7 +63,7 @@ public class PositionService {
         }
 
         if (check) {
-            return Response.ok("{\"Status\" : \"OK\"}").build();
+            return Response.ok("{\"Status\" : \"New Position successfully created!\"}").build();
         } else {
             return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Unable to add the new Position!!!\"").build();
         }
@@ -89,7 +89,7 @@ public class PositionService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
-        return Response.ok("{\"Status\" : \"OK\"}").build();
+        return Response.ok("{\"Status\" : \"Position successfully deleted!\"}").build();
     }
 
     /**
@@ -136,7 +136,7 @@ public class PositionService {
             boolean check = DBPositionQueryHandler.getInstance().updateEntity(positionId, positionDetails);
 
             if (check) {
-                return Response.ok("{\"Status\" : \"Candidate with ID " + positionId + " was successfully modified!\"}").build();
+                return Response.ok("{\"Status\" : \"Position with ID " + positionId + " was successfully modified!\"}").build();
             } else {
                 return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Position with ID " + positionId + " does not exists\"}").build();
             }

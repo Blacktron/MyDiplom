@@ -9,6 +9,7 @@ import javax.ws.rs.core.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Created by Terrax on 13-Sep-2015.
@@ -26,11 +27,12 @@ public class CandidateService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCandidateById(@PathParam("id") String candidateId) {
         System.out.println("GET /candidates get");
-        Entity candidate;
+        List<Entity> result = new ArrayList<Entity>();
 
         try {
             int id = Integer.parseInt(candidateId);
-            candidate = DBCandidateQueryHandler.getInstance().searchEntityById(id);
+            Entity candidate = DBCandidateQueryHandler.getInstance().searchEntityById(id);
+            result.add(candidate);
         } catch (SQLException e) {
             e.printStackTrace();
             return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Candidate with such ID was not found!\"}").build();
@@ -39,7 +41,7 @@ public class CandidateService {
             return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Unable to convert the provided parameter!\"}").build();
         }
 
-        return Response.ok(candidate).build();
+        return Response.ok(result).build();
     }
 
     /**
@@ -53,19 +55,18 @@ public class CandidateService {
     public Response addCandidate(JsonNode node) {
         System.out.println("POST /candidates add");
 
-        boolean check;
+        boolean check = false;
 
         try {
             check = DBCandidateQueryHandler.getInstance().addEntity(node);
         } catch (SQLException e) {
             e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
         if (check) {
-            return Response.ok("{\"Status\" : \"OK\"}").build();
+            return Response.ok("{\"Status\" : \"New Candidate successfully created!\"}").build();
         } else {
-            return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Unable to add the new Candidate!!!\"").build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Candidate already exists or the database server is down\"").build();
         }
     }
 
@@ -89,7 +90,7 @@ public class CandidateService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
-        return Response.ok("{\"Status\" : \"OK\"}").build();
+        return Response.ok("{\"Status\" : \"Candidate successfully deleted!\"}").build();
     }
 
     /**

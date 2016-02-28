@@ -63,7 +63,7 @@ public class TechnologyService {
         }
 
         if (check) {
-            return Response.ok("{\"Status\" : \"OK\"}").build();
+            return Response.ok("{\"Status\" : \"New Technology successfully created!\"}").build();
         } else {
             return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Such Technology already exists!!!\"}").build();
         }
@@ -89,7 +89,7 @@ public class TechnologyService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
-        return Response.ok("{\"Status\" : \"OK\"}").build();
+        return Response.ok("{\"Status\" : \"Technology successfully deleted!\"}").build();
     }
 
     /**

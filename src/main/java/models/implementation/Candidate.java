@@ -1,13 +1,16 @@
 package models.implementation;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import models.Entity;
 
+import java.util.Comparator;
 import java.util.List;
 
 /**
  * @Created by Terrax on 13-Sep-2015.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Candidate extends Entity {
     private String candidateFirstName;          // The first name of the Candidate.
     private String candidateLastName;           // The last name of the Candidate.

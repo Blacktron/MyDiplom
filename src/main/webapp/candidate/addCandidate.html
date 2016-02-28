@@ -1,0 +1,111 @@
+<!-- /*<style>
+  label { width: 100px; text-align: right; margin-right: 5px; }
+  input { width: 200px; }
+</style>*/ -->
+
+<!-- Include local JavaScript file -->
+<script src="../formInclude.js"></script>
+<script src="../candidateActions.js"></script>
+<script type="text/javascript">
+    /*
+        On page load
+         - get the Technologies from the database and store them in the global variable 'techs'.
+         - get the Positions from the database and store them in the global variable 'positions'.
+    */
+
+    $(function() {
+        // Get the Technologies.
+        $.ajax({
+            method: 'GET',
+            url: '/rest/technologies',
+//        data: {
+//            format: 'json'
+//        },
+//        dataType: 'json',
+            success: function (data) {
+                techs = data;
+            },
+            error: function (data) {
+                alert(data);
+            }
+        });
+
+        // Get the Positions.
+        $.ajax({
+            method: 'GET',
+            url: '/rest/positions',
+            success: function (data) {
+                positions = data;
+            },
+            error: function (data) {
+                alert(data);
+            }
+        });
+    });
+</script>
+<form class="form-horizontal">
+    <div class="form-group">
+        <label for="candidate-first-name" class="col-sm-2 control-label">First Name</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="candidate-first-name" placeholder="First Name" maxlength="50" required>
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="candidate-last-name" class="col-sm-2 control-label">Last Name</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="candidate-last-name" placeholder="Last Name" maxlength="50" required>
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="candidate-age" class="col-sm-2 control-label">Age</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="candidate-age" placeholder="Age" maxlength="2" required>
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="candidate-email" class="col-sm-2 control-label">Email</label>
+        <div class="col-sm-4">
+            <input type="email" class="form-control" id="candidate-email" placeholder="Email" maxlength="100" required>
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="experience-container">
+        <div id="experience-list">
+            <!-- Experience fields go here. -->
+        </div>
+    </div>
+
+    <!-- Add Experience button. -->
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-9">
+            <button type="button" class="btn btn-success" id="add-experience-button">Add Experience</button>
+        </div>
+    </div>
+
+    <div class="applications-container">
+        <div id="applications-list">
+            <!-- Applications fields go here. -->
+        </div>
+    </div>
+
+    <!-- Add Applications button. -->
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-9">
+            <button type="button" class="btn btn-success" id="add-applications-button">Add Application</button>
+        </div>
+    </div>
+
+    <!-- Add Candidate button. -->
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-success" onclick="addCandidate()">Add Candidate</button>
+        </div>
+    </div>
+</form>

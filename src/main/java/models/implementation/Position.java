@@ -1,19 +1,25 @@
 package models.implementation;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import models.Entity;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * @Created by Terrax on 13-Sep-2015.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Position extends Entity {
     private int hrId;                           // The ID of the HR representative.
     private int companyId;                      // The ID of the company.
     private String positionName;                // The name of the position.
     private String hrFirstName;                 // The first name of the HR representative.
     private String hrLastName;                  // The last name of the HR representative.
+    private String hrEmail;                     // The email of the HR representative.
     private String companyName;                 // The name of the company.
     private List<Requirement> requirements;     // The List holding the Requirements and corresponding details of the Position.
     private List<Candidate> applicants;         // The List holding the Candidates which applied for the Position.
@@ -56,18 +62,21 @@ public class Position extends Entity {
     /**
      * Custom constructor which accepts seven parameters. It is used when building the result after search.
      * @param positionId the ID of the position in the database.
-//     * @param hrId the ID of the HR in the database.
+     * @param hrId the ID of the HR in the database.
 //     * @param companyId the ID of the company in the database.
      * @param positionName the name of the position.
      * @param hrFirstName the first name of the HR.
      * @param hrLastName the last name of the HR.
+     * @param hrEmail the email of the HR.
      * @param companyName the name of the company.
      */
-    public Position(int positionId, String positionName, String hrFirstName, String hrLastName, String companyName) {
+    public Position(int positionId, String positionName, int hrId, String hrFirstName, String hrLastName, String hrEmail, String companyName) {
         setId(positionId);
         setPositionName(positionName);
+        setHrId(hrId);
         setHrFirstName(hrFirstName);
         setHrLastName(hrLastName);
+        setHrEmail(hrEmail);
         setCompanyName(companyName);
     }
 
@@ -149,6 +158,22 @@ public class Position extends Entity {
      */
     public void setHrLastName(String hrLastName) {
         this.hrLastName = hrLastName;
+    }
+
+    /**
+     * Shows the email of the HR representative.
+     * @return the email of the HR representative.
+     */
+    public String getHrEmail() {
+        return hrEmail;
+    }
+
+    /**
+     * Sets the email of the HR representative.
+     * @param hrEmail the email of the HR representative.
+     */
+    public void setHrEmail(String hrEmail) {
+        this.hrEmail = hrEmail;
     }
 
     /**

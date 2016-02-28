@@ -8,13 +8,12 @@ import utils.DBUtils;
 
 import javax.ws.rs.core.MultivaluedMap;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @Created by Terrax on 18-Oct-2015.
  */
-public class DBTechnologyQueryHandler implements EntityDbHandler {
+public class DBTechnologyQueryHandler extends DBUtils implements EntityDbHandler {
     private static DBTechnologyQueryHandler instance;
 
     private DBTechnologyQueryHandler() { }
@@ -52,9 +51,6 @@ public class DBTechnologyQueryHandler implements EntityDbHandler {
         String technologyExistsQuery = "SELECT technology.technologyId FROM technology WHERE technologyName = ?";
         boolean technologyExists = DBUtils.isParamExists(technologyName, technologyExistsQuery);
 
-        System.out.println("TECH NAME: " + technologyName);
-        System.out.println("EXISTS: " + technologyExists);
-
         // If there is no such Technology in the database, prepare the query and execute it.
         if (!technologyExists) {
             String query = "INSERT INTO technology(technologyName) VALUES(?)";
@@ -85,19 +81,31 @@ public class DBTechnologyQueryHandler implements EntityDbHandler {
      * @throws SQLException
      */
     public List<Entity> searchEntity(MultivaluedMap<String, String> data) throws SQLException {
-        String technologyName = "";
-        List<Entity> result = null;
+        int searchParametersCount = data.size();
+        String technologyName;
+        List<Entity> result;
 
         // Check which parameters exist in the query.
-        if (data.containsKey("technologyName")) {
-            technologyName = data.getFirst("technologyName");
-        }
-
-        if (technologyName == null || technologyName.equals("")) {
+        if (searchParametersCount == 0) {
+            // If there are no parameters provided - show all entries in the database.
             result = this.getAllEntities();
-        }
-        if (technologyName != null && !technologyName.equals("")) {
+        } else if (searchParametersCount == 1 && data.containsKey("technologyName")) {
+            technologyName = data.getFirst("technologyName");
             result = searchTechnologyByName(technologyName);
+        } else {
+            /*
+                Make a Map holding the keys and their corresponding values.
+                Pass the Map as parameter to a method which dynamically builds a query based on the
+                existing parameters.
+             */
+            Map<String, String> parameters = new HashMap<String, String>();
+
+            for (String key : data.keySet()) {
+                String value = data.getFirst(key);
+                parameters.put(key, value);
+            }
+
+            result = this.searchTechnologyByParams(parameters);
         }
 
         return result;
@@ -128,11 +136,35 @@ public class DBTechnologyQueryHandler implements EntityDbHandler {
      * @return the Technology as object.
      * @throws SQLException
      */
-    private List<Entity> searchTechnologyByName(String technologyName) throws SQLException {
+    public List<Entity> searchTechnologyByName(String technologyName) throws SQLException {
         Object[] params = {technologyName};
         String query = "SELECT * FROM technology WHERE technologyName LIKE ?";
 
         return DBUtils.execQueryAndBuildResult(query, params, this);
+    }
+
+    /**
+     * Method which searches for entries based on the provided parameters.
+     * @param parameters the parameters to search for.
+     * @return a List holding the result of the search.
+     * @throws SQLException
+     */
+    public List<Entity> searchTechnologyByParams(Map<String, String> parameters) throws SQLException {
+        // The SELECT and FROM part of the query.
+        String query = "SELECT * FROM technology";
+        int count = 0;                                                  // Used to build the array holding the parameters for query execution.
+        Object[] params = new Object[parameters.size()];                // Array of objects holding the parameters for the query execution.
+        Set<String> keys = parameters.keySet();                         // Set holding the keys of the Map used to iterate through it and build the array.
+        String fullQuery = DBUtils.buildQuery(parameters, query);       // The query which to be used when execute request to the database.
+
+        System.out.println("FULL QUERY: " + fullQuery);
+
+        for (String key : keys) {
+            params[count] = parameters.get(key);
+            count++;
+        }
+
+        return DBUtils.execQueryAndBuildResult(fullQuery, params, this);
     }
 
     /**

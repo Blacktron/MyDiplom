@@ -1,15 +1,15 @@
 <div class='form-group'>
     <label class='col-sm-2 control-label'>Technology</label>
     <div class='col-sm-4'>
-        <select class='form-control technology-container'>
+        <select class='form-control technology-container' required>
+            <option value="">None</option>
 			<!-- Options are filled here by AJAX call. -->
 		</select>
     </div>
-    <div class='col-sm-6'></div>
+    <div class='col-sm-offset-1'></div>
 
     <label class='col-sm-2 control-label'>Years</label>
-    <div class='col-sm-4'>
+    <div class='col-sm-3'>
         <input type='text' class='form-control years' placeholder='Years' maxlength="2" required>
     </div>
-    <div class='col-sm-6'></div>
 </div>

@@ -63,7 +63,7 @@ public class CompanyService {
         }
 
         if (check) {
-            return Response.ok("{\"Status\" : \"OK\"}").build();
+            return Response.ok("{\"Status\" : \"New Company successfully created!\"}").build();
         } else {
             return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Such Company already exists!!!\"}").build();
         }
@@ -89,7 +89,7 @@ public class CompanyService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
-        return Response.ok("{\"Status\" : \"OK\"}").build();
+        return Response.ok("{\"Status\" : \"Company successfully deleted!\"}").build();
     }
 
     /**

@@ -7,6 +7,13 @@
 	<!-- Include local JavaScript file -->
 	<script src="formInclude.js"></script>
 
+    <!-- Does not work. -->
+    <script type="text/javascript">
+        $('body').on('hidden.bs.modal', '.modal', function () {
+            $(this).removeData('bs.modal');
+        });
+    </script>
+
 	<meta charset="UTF-8">
 	<title>Main Page</title>
 </head>
@@ -24,13 +31,9 @@
 	      <a class="navbar-brand" href="#">
 	      	<img alt="Brand" src="logo3.jpg">
 	      </a>
-
-	      <!-- <a class="navbar-brand" href="#">
-	        <img alt="Brand" src="hrd1.jpg">
-	      </a> -->
 	    </div>
 
-	    <!-- Action buttons with dropdowns -->
+	    <!-- Action buttons with drop downs -->
 	  	<ul class="nav nav-pills">
 		  <li role="presentation" class="dropdown">
 		    <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Candidates<span class="caret"></span></a>
@@ -43,39 +46,40 @@
 		  <li role="presentation" class="dropdown">
 		    <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Positions<span class="caret"></span></a>
 		    <ul class="dropdown-menu">
-		      <li><a href="addPosition" title="Add new position">Add Position</a></li>
-		      <li><a href="searchPosition" title="Search for a position">Search Position</a></li>
+		      <li><a href="#" title="Add new position" id="add-position-button">Add Position</a></li>
+		      <li><a href="#" title="Search for a position" id="search-position-button">Search Position</a></li>
+				<li><a href="#" title="Search for a match" id="search-for-match-button">Search For Match</a></li>
 		    </ul>
 		  </li>
 
 		  <li role="presentation" class="dropdown">
 		    <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Technologies<span class="caret"></span></a>
 		    <ul class="dropdown-menu">
-		      <li><a href="addTechnology" title="Add new technology">Add Technology</a></li>
-		      <li><a href="searchTechnology" title="Search for a technology">Search Technology</a></li>
+		      <li><a href="#" title="Add new technology" id="add-technology-button">Add Technology</a></li>
+		      <li><a href="#" title="Search for a technology" id="search-technology-button">Search Technology</a></li>
 		    </ul>
 		  </li>
 
 		  <li role="presentation" class="dropdown">
 		    <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Companies<span class="caret"></span></a>
 		    <ul class="dropdown-menu">
-		      <li><a href="addCompany" title="Add new company">Add Company</a></li>
-		      <li><a href="searchCompany" title="Search for a company">Search Company</a></li>
+		      <li><a href="#" title="Add new company" id="add-company-button">Add Company</a></li>
+		      <li><a href="#" title="Search for a company" id="search-company-button">Search Company</a></li>
 		    </ul>
 		  </li>
 
 		  <li role="presentation" class="dropdown">
 		    <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">HRs<span class="caret"></span></a>
 		    <ul class="dropdown-menu">
-		      <li><a href="addHR" title="Add new candidate">Add HR</a></li>
-		      <li><a href="searchHR" title="Search for a candidate">Search HR</a></li>
+		      <li><a href="#" title="Add new candidate" id="add-hr-button">Add HR</a></li>
+		      <li><a href="#" title="Search for a candidate" id="search-hr-button">Search HR</a></li>
 		    </ul>
 		  </li>
 		</ul>
 	  </div><!-- /.container-fluid -->
 	</nav>
 
-	<div class="content-container" style="margin-left: auto; margin-right; auto">
+	<div class="content-container" style="margin-left: auto; margin-right: auto">
 		<!-- Various content goes here. Example: input forms, search results and etc. -->
 	</div>
 </body>

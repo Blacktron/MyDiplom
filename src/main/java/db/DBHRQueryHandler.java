@@ -17,7 +17,7 @@ import java.util.*;
 /**
  * @Created by Terrax on 09-Dec-2015.
  */
-public class DBHRQueryHandler implements EntityDbHandler {
+public class DBHRQueryHandler extends DBUtils implements EntityDbHandler {
     private static DBHRQueryHandler instance;
 
     private DBHRQueryHandler() { }
@@ -36,7 +36,7 @@ public class DBHRQueryHandler implements EntityDbHandler {
      * @throws SQLException
      */
     public List<Entity> getAllEntities() throws SQLException {
-        String query = "SELECT hr.hrId, hr.hrFirstName, hr.hrLastName, hr.phone, hr.hrEmail, company.companyId, company.companyName, FROM hr, company WHERE hr.companyId = company.companyId ORDER BY company.companyName, hr.hrFirstName, hr.hrLastName";
+        String query = "SELECT hr.hrId, hr.hrFirstName, hr.hrLastName, hr.phone, hr.hrEmail, company.companyId, company.companyName FROM hr, company WHERE hr.companyId = company.companyId ORDER BY company.companyName, hr.hrFirstName, hr.hrLastName";
         return DBUtils.execQueryAndBuildResult(query, null, this);
     }
 
@@ -54,7 +54,7 @@ public class DBHRQueryHandler implements EntityDbHandler {
         String hrExistsQuery = "SELECT hrId FROM hr WHERE hrEmail = ?";
         boolean hrExists = DBUtils.isParamExists(hrEmail, hrExistsQuery);
 
-        // Add the new Candidate if the email address is not found in the database.
+        // Add the new HR if the email address is not found in the database.
         if (!hrExists) {
             // Prepare the query and execute it.
             String hrFirstName = hr.getHrFirstName();
@@ -150,7 +150,7 @@ public class DBHRQueryHandler implements EntityDbHandler {
      * @throws SQLException
      */
     public List<Entity> searchHRByParams(Map<String, String> parameters) throws SQLException {
-
+        // The SELECT and FROM part of the query.
         String query = "SELECT hr.hrId, hr.hrFirstName, hr.hrLastName, hr.phone, hr.hrEmail, company.companyId, company.companyName FROM hr, company";
         int count = 0;                                                  // Used to build the array holding the parameters for query execution.
         Object[] params = new Object[parameters.size()];                // Array of objects holding the parameters for the query execution.
@@ -189,18 +189,20 @@ public class DBHRQueryHandler implements EntityDbHandler {
             if (operations.isArray()) {
                 for (JsonNode action : operations) {
                     operation = action.toString().replaceAll("\"", "");
-                    System.out.println("OPERATION: " + operation);
+                    System.out.println("ACTION: " + operation);
 
                     // If we want to modify the Company ID which the HR is working for.
                     if (operation.equalsIgnoreCase("modifyCompany")) {
                         // Check if the Company exists in the database.
-                        int companyId = Integer.parseInt(node.get("companyId").textValue());
+                        String companyName = node.get("companyName").textValue();
+                        List<Entity> company = DBCompanyQueryHandler.getInstance().searchCompanyByName(companyName);
+
+                        int companyId = company.get(0).getId();
                         String companyExistsQuery = "SELECT companyId FROM company WHERE companyId = ?";
                         boolean companyExists = DBUtils.isParamExists(companyId, companyExistsQuery);
 
                         // Modify the Company.
                         if (companyExists) {
-                            System.out.println("COMPANY EXISTS");
                             query = "UPDATE hr SET companyId = ? WHERE hrId = ?";
                             params = new Object[]{companyId, hrId};
                             DBUtils.execQuery(query, params);
@@ -208,25 +210,23 @@ public class DBHRQueryHandler implements EntityDbHandler {
                         }
                     }
 
-                    // If we want to modify the name(s) of the HR.
-                    if (operation.equalsIgnoreCase("modifyName")) {
-                        if (node.has("hrFirstName") && node.has("hrLastName")) {
-                            String hrFirstName = node.get("hrFirstName").textValue();
-                            String hrLastName = node.get("hrLastName").textValue();
-                            query = "UPDATE hr SET hrFirstName = ?, hrLastName = ? WHERE hrId = ?";
-                            params = new Object[]{hrFirstName, hrLastName, hrId};
-                            DBUtils.execQuery(query, params);
-                        } else if (node.has("hrFirstName")) {
-                            String hrFirstName = node.get("hrFirstName").textValue();
-                            query = "UPDATE hr SET hrFirstName = ? WHERE hrId = ?";
-                            params = new Object[]{hrFirstName, hrId};
-                            DBUtils.execQuery(query, params);
-                        } else if (node.has("hrLastName")) {
-                            String hrLastName = node.get("hrLastName").textValue();
-                            query = "UPDATE hr SET hrLastName = ? WHERE hrId = ?";
-                            params = new Object[]{hrLastName, hrId};
-                            DBUtils.execQuery(query, params);
-                        }
+                    // If we want to modify the first name of the HR.
+                    if (operation.equalsIgnoreCase("modifyFirstName")) {
+                        System.out.println();
+                        String hrFirstName = node.get("hrFirstName").textValue();
+                        query = "UPDATE hr SET hrFirstName = ? WHERE hrId = ?";
+                        params = new Object[]{hrFirstName, hrId};
+                        DBUtils.execQuery(query, params);
+
+                        check = true;
+                    }
+
+                    // If we want to modify the last name of the HR.
+                    if (operation.equalsIgnoreCase("modifyLastName")) {
+                        String hrLastName = node.get("hrLastName").textValue();
+                        query = "UPDATE hr SET hrLastName = ? WHERE hrId = ?";
+                        params = new Object[]{hrLastName, hrId};
+                        DBUtils.execQuery(query, params);
 
                         check = true;
                     }

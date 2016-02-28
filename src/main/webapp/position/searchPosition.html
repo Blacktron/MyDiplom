@@ -1,0 +1,193 @@
+<!-- Include local JavaScript file -->
+<script src="../positionActions.js"></script>
+<script type="text/javascript">
+    /*
+     On page load
+     - get the Technologies from the database and store them in the global variable 'technologies'.
+     - get the HRs from the database and store them in the global variable 'hrs'.
+     - get the Companies from the database and store them in the global variable 'positionCompanies'.
+     - get the Candidates from the database and store them in the global variable 'candidates'.
+     */
+
+    $(function() {
+        // Get the Technologies.
+        $.ajax({
+            method: 'GET',
+            url: '/rest/technologies',
+            success: function (data) {
+                technologies = data;
+            },
+            error: function (data) {
+                alert(data);
+            }
+        });
+
+        // Get the HRs.
+        $.ajax({
+            method: 'GET',
+            url: '/rest/hrs',
+            success: function (data) {
+                hrs = data;
+            },
+            error: function (data) {
+                alert(data);
+            }
+        });
+
+        // Get the Companies.
+        $.ajax({
+            method: 'GET',
+            url: '/rest/companies',
+            success: function (data) {
+                positionCompanies = data;
+            },
+            error: function (data) {
+                alert(data);
+            }
+        });
+
+        // Get the Candidates.
+        $.ajax({
+            method: 'GET',
+            url: '/rest/candidates',
+            success: function (data) {
+                candidates = data;
+            },
+            error: function (data) {
+                alert(data);
+            }
+        });
+    });
+
+    $('body').on('hidden.bs.modal', '.modal', function () {
+        $(this).removeData('bs.modal');
+    });
+</script>
+
+<form class="form-horizontal">
+    <div class="form-group">
+        <label for="position-ID" class="col-sm-2 control-label">Position ID</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="position-ID" placeholder="Position ID" maxlength="4">
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="position-name" class="col-sm-2 control-label">Position Name</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="position-name" placeholder="Position Name" maxlength="50">
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="company-name" class="col-sm-2 control-label">Company Name</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="company-name" placeholder="Company Name" maxlength="50">
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <!-- Search database button. -->
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-info" onclick="searchPosition()">Search Position</button>
+        </div>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-hover" id="search-result-table">
+        <tr>
+            <th>ID</th> <th>Position Name</th> <th>Company</th> <th>HR ID</th> <th>HR First Name</th> <th>HR Last Name</th> <th>Email</th> <th>Requirements</th> <th>Applicants</th>
+        </tr>
+    </table>
+</div>
+
+<div class="modal fade" id="positionModal" tabindex="-1" role="dialog" aria-labelledby="positionModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="positionModalLabel">Edit Position</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label for="dialog-position-ID" class="col-sm-4 control-label">Position ID</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="dialog-position-ID" placeholder="Position ID" maxlength="4" disabled="disabled">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dialog-position-name" class="col-sm-4 control-label">Position Name</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="dialog-position-name" placeholder="Position Name" maxlength="50">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dialog-company-name" class="col-sm-4 control-label">Company Name</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="dialog-company-name" placeholder="Company Name" maxlength="50">
+                        </div>
+                    </div>
+
+                    <div align="center">
+                        <p><b>HR</b></p>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="hr-table">
+                            <tr>
+                                <th>ID</th> <th>First Name</th> <th>Last Name</th> <th>Email</th> <th></th>
+                            </tr>
+                        </table>
+                        <div class="dialog-hr-list">
+                            <!-- Add HR fields appear here. -->
+                        </div>
+                        <button type="button" class="btn btn-success" id="dialog-add-position-hr-button">Add HR</button>
+                    </div>
+
+                    <div align="center">
+                        <p><b>Requirements</b></p>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="requirements-table">
+                            <tr>
+                                <th>Technology</th> <th>Years</th> <th>Priority</th> <th></th>
+                            </tr>
+                        </table>
+                        <div class="dialog-requirements-list">
+                            <!-- Add Requirement fields appear here. -->
+                        </div>
+                        <button type="button" class="btn btn-success" id="dialog-add-requirements-button">Add Requirement</button>
+                    </div>
+
+                    <div align="center">
+                        <p><b>Applications</b></p>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="applications-table">
+                            <tr>
+                                <th>ID</th> <th>First Name</th> <th>Last Name</th> <th>Age</th> <th></th>
+                            </tr>
+                        </table>
+                        <div class="dialog-application-list">
+                            <!-- Add Application fields appear here. -->
+                        </div>
+                        <button type="button" class="btn btn-success" id="dialog-add-applications-button">Add Applicant</button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="close-position-changes-button" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="save-position-changes-button" data-dismiss="modal">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>

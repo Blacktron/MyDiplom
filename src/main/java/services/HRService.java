@@ -63,7 +63,7 @@ public class HRService {
         }
 
         if (check) {
-            return Response.ok("{\"Status\" : \"OK\"}").build();
+            return Response.ok("{\"Status\" : \"New HR successfully created!\"}").build();
         } else {
             return Response.status(Response.Status.BAD_REQUEST).entity("{\"Error\" : \"Unable to add the new HR!!!\"").build();
         }
@@ -89,7 +89,7 @@ public class HRService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
-        return Response.ok("{\"Status\" : \"OK\"}").build();
+        return Response.ok("{\"Status\" : \"HR successfully deleted!\"}").build();
     }
 
     /**

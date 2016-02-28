@@ -1,0 +1,127 @@
+<!-- Include local JavaScript file -->
+<script src="../hrActions.js"></script>
+
+<form class="form-horizontal">
+    <div class="form-group">
+        <label for="hr-ID" class="col-sm-2 control-label">HR ID</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="hr-ID" placeholder="HR ID" maxlength="4">
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="hr-first-name" class="col-sm-2 control-label">First Name</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="hr-first-name" placeholder="First Name" maxlength="50">
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="hr-last-name" class="col-sm-2 control-label">Last Name</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="hr-last-name" placeholder="Last Name" maxlength="50">
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="phone" class="col-sm-2 control-label">Phone</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="phone" placeholder="Phone" maxlength="2">
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="hr-email" class="col-sm-2 control-label">Email</label>
+        <div class="col-sm-4">
+            <input type="email" class="form-control" id="hr-email" placeholder="Email" maxlength="100">
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="hr-company" class="col-sm-2 control-label">Company</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="hr-company" placeholder="Company" maxlength="100">
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <!-- Search database button. -->
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-info" onclick="searchHR()">Search HR</button>
+        </div>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-hover" id="search-result-table">
+        <tr>
+            <th>ID</th> <th>First Name</th> <th>Last Name</th> <th>Phone</th> <th>Email</th> <th>Company</th>
+        </tr>
+    </table>
+</div>
+
+<div class="modal fade" id="hrModal" tabindex="-1" role="dialog" aria-labelledby="hrModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="hrModalLabel">Edit HR</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label for="dialog-hr-ID" class="col-sm-4 control-label">HR ID</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="dialog-hr-ID" placeholder="HR ID" maxlength="4" disabled="disabled">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dialog-hr-first-name" class="col-sm-4 control-label">First Name</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="dialog-hr-first-name" placeholder="First Name" maxlength="50">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dialog-hr-last-name" class="col-sm-4 control-label">Last Name</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="dialog-hr-last-name" placeholder="Last Name" maxlength="50">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dialog-hr-phone" class="col-sm-4 control-label">Phone</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="dialog-hr-phone" placeholder="Age" maxlength="2">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dialog-hr-email" class="col-sm-4 control-label">Email</label>
+                        <div class="col-sm-8">
+                            <input type="email" class="form-control" id="dialog-hr-email" placeholder="Email" maxlength="100">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dialog-hr-company" class="col-sm-4 control-label">Company</label>
+                        <div class="col-sm-8">
+                            <input type="email" class="form-control" id="dialog-hr-company" placeholder="Company" maxlength="100">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="save-hr-changes-button" data-dismiss="modal">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>

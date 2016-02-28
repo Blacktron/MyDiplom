@@ -1,11 +1,13 @@
 package models.implementation;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import models.Entity;
 
 /**
  * @Created by Terrax on 13-Sep-2015.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Technology extends Entity {
     private String technologyName;      // The name of the Technology.
 

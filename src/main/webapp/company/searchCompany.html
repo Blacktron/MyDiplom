@@ -1,0 +1,67 @@
+<!-- Include local JavaScript file -->
+<script src="../companyActions.js"></script>
+
+<form class="form-horizontal">
+    <div class="form-group">
+        <label for="company-ID" class="col-sm-2 control-label">Company ID</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="company-ID" placeholder="Company ID" maxlength="4">
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="company-name" class="col-sm-2 control-label">Company Name</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="company-name" placeholder="Company Name" maxlength="50">
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <!-- Search database button. -->
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-info" onclick="searchCompany()">Search Company</button>
+        </div>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-hover" id="search-result-table">
+        <tr>
+            <th>ID</th> <th>Company Name</th>
+        </tr>
+    </table>
+</div>
+
+<div class="modal fade" id="companyModal" tabindex="-1" role="dialog" aria-labelledby="companyModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="companyModalLabel">Edit Company</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label for="dialog-company-ID" class="col-sm-4 control-label">Company ID</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="dialog-company-ID" placeholder="Company ID" maxlength="4" disabled="disabled">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dialog-company-name" class="col-sm-4 control-label">Company Name</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="dialog-company-name" placeholder="Company Name" maxlength="50">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="save-company-changes-button" data-dismiss="modal">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>

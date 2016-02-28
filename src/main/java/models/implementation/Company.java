@@ -1,11 +1,13 @@
 package models.implementation;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import models.Entity;
 
 /**
  * @Created by Terrax on 13-Sep-2015.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Company extends Entity {
     private String companyName;     // The name of the Company.
 

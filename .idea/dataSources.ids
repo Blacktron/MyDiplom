@@ -127,217 +127,178 @@ companyId</columns>
         <columns>companyId</columns>
         <primary>1</primary>
       </key>
-      <column id="36" parent="5" name="position_has_candidateId">
+      <column id="36" parent="5" name="positionId">
         <mandatory>1</mandatory>
         <data-type>int(11)</data-type>
       </column>
-      <column id="37" parent="5" name="position_positionId">
+      <column id="37" parent="5" name="candidateId">
         <mandatory>1</mandatory>
         <data-type>int(11)</data-type>
       </column>
-      <column id="38" parent="5" name="candidate_candidateId">
-        <mandatory>1</mandatory>
-        <data-type>int(11)</data-type>
-      </column>
-      <index id="39" parent="5" name="fk_positions_has_candidates_candidates1_idx">
-        <columns>candidate_candidateId</columns>
+      <index id="38" parent="5" name="fk_positions_has_candidates_candidates1_idx">
+        <columns>candidateId</columns>
         <desc-columns></desc-columns>
       </index>
-      <index id="40" parent="5" name="fk_positions_has_candidates_positions1_idx">
-        <columns>position_positionId</columns>
+      <index id="39" parent="5" name="fk_positions_has_candidates_positions1_idx">
+        <columns>positionId</columns>
         <desc-columns></desc-columns>
       </index>
-      <key id="41" parent="5" name="PRIMARY">
-        <columns>position_has_candidateId
-position_positionId
-candidate_candidateId</columns>
+      <key id="40" parent="5" name="PRIMARY">
+        <columns>positionId
+candidateId</columns>
         <primary>1</primary>
       </key>
-      <foreign-key id="42" parent="5" name="fk_positions_has_candidates_candidates1">
-        <columns>candidate_candidateId</columns>
+      <foreign-key id="41" parent="5" name="fk_positions_has_candidates_candidates1">
+        <columns>candidateId</columns>
         <ref-key>~.candidate.idCandidates_UNIQUE</ref-key>
         <cascade-update-rule>restrict</cascade-update-rule>
         <cascade-delete-rule>restrict</cascade-delete-rule>
       </foreign-key>
-      <foreign-key id="43" parent="5" name="fk_positions_has_candidates_positions1">
-        <columns>position_positionId</columns>
+      <foreign-key id="42" parent="5" name="fk_positions_has_candidates_positions1">
+        <columns>positionId</columns>
         <ref-key>~.positions.idPositions_UNIQUE</ref-key>
         <cascade-update-rule>restrict</cascade-update-rule>
         <cascade-delete-rule>restrict</cascade-delete-rule>
       </foreign-key>
-      <column id="44" parent="6" name="requirementId">
+      <column id="43" parent="6" name="positionId">
         <mandatory>1</mandatory>
         <data-type>int(11)</data-type>
       </column>
-      <column id="45" parent="6" name="positionId">
+      <column id="44" parent="6" name="technologyId">
         <mandatory>1</mandatory>
         <data-type>int(11)</data-type>
       </column>
-      <column id="46" parent="6" name="technologyId">
+      <column id="45" parent="6" name="years">
         <mandatory>1</mandatory>
         <data-type>int(11)</data-type>
       </column>
-      <column id="47" parent="6" name="years">
-        <mandatory>1</mandatory>
-        <data-type>int(11)</data-type>
-      </column>
-      <column id="48" parent="6" name="priority">
+      <column id="46" parent="6" name="priority">
         <data-type>int(11)</data-type>
         <default-expression>&apos;1&apos;</default-expression>
       </column>
-      <index id="49" parent="6" name="fk_requirements_positions1_idx">
+      <index id="47" parent="6" name="fk_requirements_positions1_idx">
         <columns>positionId</columns>
         <desc-columns></desc-columns>
       </index>
-      <index id="50" parent="6" name="fk_requirements_tech1_idx">
+      <index id="48" parent="6" name="fk_requirements_tech1_idx">
         <columns>technologyId</columns>
         <desc-columns></desc-columns>
       </index>
-      <index id="51" parent="6" name="requirementsId_UNIQUE">
-        <columns>requirementId</columns>
-        <desc-columns></desc-columns>
-        <unique>1</unique>
-      </index>
-      <key id="52" parent="6" name="PRIMARY">
-        <columns>requirementId
-positionId
+      <key id="49" parent="6" name="PRIMARY">
+        <columns>positionId
 technologyId</columns>
         <primary>1</primary>
       </key>
-      <key id="53" parent="6" name="requirementsId_UNIQUE">
-        <columns>requirementId</columns>
-        <underlying-index>requirementsId_UNIQUE</underlying-index>
-      </key>
-      <foreign-key id="54" parent="6" name="fk_requirements_positions1">
+      <foreign-key id="50" parent="6" name="fk_requirements_positions1">
         <columns>positionId</columns>
         <ref-key>~.positions.idPositions_UNIQUE</ref-key>
         <cascade-update-rule>restrict</cascade-update-rule>
         <cascade-delete-rule>restrict</cascade-delete-rule>
       </foreign-key>
-      <foreign-key id="55" parent="6" name="fk_requirements_tech1">
-        <columns>technologyId</columns>
-        <ref-key>~.technology.PRIMARY</ref-key>
-        <cascade-update-rule>restrict</cascade-update-rule>
-        <cascade-delete-rule>restrict</cascade-delete-rule>
-      </foreign-key>
-      <column id="56" parent="7" name="technologyId">
+      <column id="51" parent="7" name="technologyId">
         <mandatory>1</mandatory>
         <data-type>int(11)</data-type>
       </column>
-      <column id="57" parent="7" name="technologyName">
+      <column id="52" parent="7" name="technologyName">
         <mandatory>1</mandatory>
         <data-type>varchar(45)</data-type>
       </column>
-      <index id="58" parent="7" name="techId_UNIQUE">
+      <index id="53" parent="7" name="techId_UNIQUE">
         <columns>technologyId</columns>
         <desc-columns></desc-columns>
         <unique>1</unique>
       </index>
-      <key id="59" parent="7" name="PRIMARY">
+      <key id="54" parent="7" name="PRIMARY">
         <columns>technologyId</columns>
         <primary>1</primary>
       </key>
-      <key id="60" parent="7" name="techId_UNIQUE">
+      <key id="55" parent="7" name="techId_UNIQUE">
         <columns>technologyId</columns>
         <underlying-index>techId_UNIQUE</underlying-index>
       </key>
-      <column id="61" parent="8" name="experienceId">
+      <column id="56" parent="8" name="candidateId">
         <mandatory>1</mandatory>
         <data-type>int(11)</data-type>
       </column>
-      <column id="62" parent="8" name="candidateId">
+      <column id="57" parent="8" name="technologyId">
         <mandatory>1</mandatory>
         <data-type>int(11)</data-type>
       </column>
-      <column id="63" parent="8" name="technologyId">
+      <column id="58" parent="8" name="years">
         <mandatory>1</mandatory>
         <data-type>int(11)</data-type>
       </column>
-      <column id="64" parent="8" name="years">
-        <mandatory>1</mandatory>
-        <data-type>int(11)</data-type>
-      </column>
-      <index id="65" parent="8" name="experianceId_UNIQUE">
-        <columns>experienceId</columns>
-        <desc-columns></desc-columns>
-        <unique>1</unique>
-      </index>
-      <index id="66" parent="8" name="fk_experiance_candidates1_idx">
+      <index id="59" parent="8" name="fk_experiance_candidates1_idx">
         <columns>candidateId</columns>
         <desc-columns></desc-columns>
       </index>
-      <index id="67" parent="8" name="fk_experiance_tech1_idx">
+      <index id="60" parent="8" name="fk_experiance_tech1_idx">
         <columns>technologyId</columns>
         <desc-columns></desc-columns>
       </index>
-      <key id="68" parent="8" name="experianceId_UNIQUE">
-        <columns>experienceId</columns>
-        <underlying-index>experianceId_UNIQUE</underlying-index>
-      </key>
-      <key id="69" parent="8" name="PRIMARY">
-        <columns>experienceId
-candidateId
+      <key id="61" parent="8" name="PRIMARY">
+        <columns>candidateId
 technologyId</columns>
         <primary>1</primary>
       </key>
-      <foreign-key id="70" parent="8" name="fk_experiance_candidates1">
+      <foreign-key id="62" parent="8" name="fk_experiance_candidates1">
         <columns>candidateId</columns>
         <ref-key>~.candidate.idCandidates_UNIQUE</ref-key>
         <cascade-update-rule>restrict</cascade-update-rule>
         <cascade-delete-rule>restrict</cascade-delete-rule>
       </foreign-key>
-      <foreign-key id="71" parent="8" name="fk_experiance_tech1">
+      <foreign-key id="63" parent="8" name="fk_experiance_tech1">
         <columns>technologyId</columns>
         <ref-key>~.technology.PRIMARY</ref-key>
         <cascade-update-rule>restrict</cascade-update-rule>
         <cascade-delete-rule>restrict</cascade-delete-rule>
       </foreign-key>
-      <column id="72" parent="9" name="positionId">
+      <column id="64" parent="9" name="positionId">
         <mandatory>1</mandatory>
         <data-type>int(11)</data-type>
       </column>
-      <column id="73" parent="9" name="hrId">
+      <column id="65" parent="9" name="hrId">
         <mandatory>1</mandatory>
         <data-type>int(11)</data-type>
       </column>
-      <column id="74" parent="9" name="companyId">
+      <column id="66" parent="9" name="companyId">
         <mandatory>1</mandatory>
         <data-type>int(11)</data-type>
       </column>
-      <column id="75" parent="9" name="positionName">
+      <column id="67" parent="9" name="positionName">
         <mandatory>1</mandatory>
         <data-type>varchar(90)</data-type>
       </column>
-      <index id="76" parent="9" name="fk_positions_companies1_idx">
+      <index id="68" parent="9" name="fk_positions_companies1_idx">
         <columns>companyId</columns>
         <desc-columns></desc-columns>
       </index>
-      <index id="77" parent="9" name="fk_positions_hr1_idx">
+      <index id="69" parent="9" name="fk_positions_hr1_idx">
         <columns>hrId</columns>
         <desc-columns></desc-columns>
       </index>
-      <index id="78" parent="9" name="idPositions_UNIQUE">
+      <index id="70" parent="9" name="idPositions_UNIQUE">
         <columns>positionId</columns>
         <desc-columns></desc-columns>
         <unique>1</unique>
       </index>
-      <key id="79" parent="9" name="idPositions_UNIQUE">
+      <key id="71" parent="9" name="idPositions_UNIQUE">
         <columns>positionId</columns>
         <underlying-index>idPositions_UNIQUE</underlying-index>
       </key>
-      <key id="80" parent="9" name="PRIMARY">
+      <key id="72" parent="9" name="PRIMARY">
         <columns>positionId
 hrId
 companyId</columns>
         <primary>1</primary>
       </key>
-      <foreign-key id="81" parent="9" name="fk_positions_companies1">
+      <foreign-key id="73" parent="9" name="fk_positions_companies1">
         <columns>companyId</columns>
         <ref-key>~.company.idCompany_UNIQUE</ref-key>
         <cascade-update-rule>restrict</cascade-update-rule>
         <cascade-delete-rule>restrict</cascade-delete-rule>
       </foreign-key>
-      <foreign-key id="82" parent="9" name="fk_positions_hr1">
+      <foreign-key id="74" parent="9" name="fk_positions_hr1">
         <columns>hrId</columns>
         <ref-key>~.hr.hrId_UNIQUE</ref-key>
         <cascade-update-rule>restrict</cascade-update-rule>

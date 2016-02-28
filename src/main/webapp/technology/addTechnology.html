@@ -1,0 +1,20 @@
+<!-- Include local JavaScript file -->
+<script src="../formInclude.js"></script>
+<script src="technologyActions.js"></script>
+
+<form class="form-horizontal">
+    <div class="form-group">
+        <label for="technology-name" class="col-sm-2 control-label">Technology Name</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="technology-name" placeholder="Technology Name" maxlength="50" required>
+        </div>
+        <div class="col-sm-6"></div>
+    </div>
+
+    <!-- Add Technology button. -->
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-success" onclick="addTechnology()">Add Technology</button>
+        </div>
+    </div>
+</form>
