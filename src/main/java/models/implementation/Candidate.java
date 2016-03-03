@@ -11,7 +11,7 @@ import java.util.List;
  * @Created by Terrax on 13-Sep-2015.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Candidate extends Entity {
+public class Candidate extends Entity implements Comparable<Candidate> {
     private String candidateFirstName;          // The first name of the Candidate.
     private String candidateLastName;           // The last name of the Candidate.
     private int age;                            // The age of the Candidate.
@@ -189,5 +189,14 @@ public class Candidate extends Entity {
                 ", age=" + age + '\'' +
                 ", candidateEmail=" + candidateEmail +
                 '}';
+    }
+
+    public int compareTo(Candidate candidate) {
+        System.out.println("compareTo called");
+        int compareRating = candidate.getRating();
+
+        if (rating > compareRating) return -1;
+        else if (rating == compareRating) return 0;
+        else return 1;
     }
 }

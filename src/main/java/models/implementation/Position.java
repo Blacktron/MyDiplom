@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import models.Entity;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -222,6 +220,10 @@ public class Position extends Entity {
      */
     public void setApplicants(List<Candidate> applicants) {
         this.applicants = applicants;
+    }
+
+    public void sortByRating() {
+        Collections.sort(applicants);
     }
 
     /**

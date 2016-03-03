@@ -505,40 +505,33 @@ public class DBPositionQueryHandler extends DBUtils implements EntityDbHandler {
             //String query = "SELECT positions.positionId, positions.positionName, GROUP_CONCAT(DISTINCT technology.technologyName, ' ', requirement.years, ' ', requirement.priority ORDER BY requirement.years SEPARATOR ',') AS 'Requirements', GROUP_CONCAT(DISTINCT candidate.candidateId, ' ', candidate.candidateFirstName, ' ', candidate.candidateLastName, ' ', candidate.age, ' ', candidate.candidateEmail, ' ', technology.technologyName, ' ', experience.years ORDER BY candidate.candidateId) AS 'Candidates' FROM positions, candidate, technology, experience, requirement, position_has_candidate WHERE positions.positionId = ? AND positions.positionId = position_has_candidate.positionId AND candidate.candidateId = position_has_candidate.candidateId AND requirement.technologyId = technology.technologyId AND requirement.positionId = positions.positionId AND technology.technologyId = experience.technologyId GROUP BY positions.positionName";
             String query = "SELECT position.positionId, " +
                                     "position.positionName, " +
-                                    "phc.candidateId, " +
-                                    "candidates.candidateFirstName, " +
-                                    "candidates.candidateLastName, " +
-                                    "candidates.age, " +
-                                    "candidates.candidateEmail, " +
-                                    "candidates.experience AS Experience, " +
-                                    "candidates.years AS Years, " +
-                                    "position.technologyId, " +
-                                    "position.technologyName AS Requirements, " +
-                                    "position.years AS ReqYears, " +
-                                    "position.priority AS Priority " +
-                                "FROM position_has_candidate phc " +
-                                    "INNER JOIN (SELECT candidate.candidateId AS candidateId, " +
-                                                        "candidate.candidateFirstName AS candidateFirstName, " +
-                                                        "candidate.candidateLastName AS candidateLastName, " +
-                                                        "candidate.candidateEmail AS candidateEmail, " +
-                                                        "candidate.age AS age, " +
-                                                        "GROUP_CONCAT(technology.technologyName) AS experience, " +
-                                                        "GROUP_CONCAT(experience.years) AS years " +
-                                                "FROM candidate " +
-                                                    "INNER JOIN experience ON experience.candidateId = candidate.candidateId " +
-                                                    "INNER JOIN technology ON technology.technologyId = experience.technologyId " +
-                                                "GROUP BY candidate.candidateId) AS candidates ON phc.candidateId = candidates.candidateId " +
-                                    "INNER JOIN (SELECT positions.positionId AS positionId, " +
-                                                        "positions.positionName AS positionName, " +
-                                                        "GROUP_CONCAT(technology.technologyId) AS technologyId, " +
-                                                        "GROUP_CONCAT(technology.technologyName) AS technologyName, " +
-                                                        "GROUP_CONCAT(requirement.years) AS years, " +
-                                                        "GROUP_CONCAT(requirement.priority) AS priority " +
-                                                "FROM positions " +
-                                                    "INNER JOIN requirement ON positions.positionId = requirement.positionId " +
-                                                    "INNER JOIN technology ON technology.technologyId = requirement.technologyId " +
-                                                "GROUP BY positions.positionId) AS position ON phc.positionId = position.positionId " +
-                           "WHERE position.positionId = ?";
+                                    "GROUP_CONCAT(DISTINCT phc.candidateId, '_', candidates.candidateFirstName, '_', candidates.candidateLastName, '_', candidates.age, '_', candidates.candidateEmail, '_', candidates.experience, '_', candidates.years SEPARATOR ';') AS 'Applicants', " +
+                                    "GROUP_CONCAT(DISTINCT position.technologyName SEPARATOR ',') AS 'Requirements', " +
+                                    "GROUP_CONCAT(DISTINCT position.years SEPARATOR ',') AS 'ReqYears', " +
+                                    "GROUP_CONCAT(DISTINCT position.priority SEPARATOR ',') AS 'Priority' " +
+                            "FROM position_has_candidate phc " +
+                                "INNER JOIN (SELECT candidate.candidateId AS candidateId," +
+                                                    "candidate.candidateFirstName AS candidateFirstName, " +
+                                                    "candidate.candidateLastName AS candidateLastName, " +
+                                                    "candidate.candidateEmail AS candidateEmail, " +
+                                                    "candidate.age AS age, " +
+                                                    "GROUP_CONCAT(technology.technologyName) AS experience, " +
+                                                    "GROUP_CONCAT(experience.years) AS years " +
+                                            "FROM candidate " +
+                                                "INNER JOIN experience ON experience.candidateId = candidate.candidateId " +
+                                                "INNER JOIN technology ON technology.technologyId = experience.technologyId " +
+                                            "GROUP BY candidate.candidateId) AS candidates ON phc.candidateId = candidates.candidateId " +
+                                "INNER JOIN (SELECT positions.positionId AS positionId, " +
+                                                "positions.positionName AS positionName, " +
+                                                "GROUP_CONCAT(technology.technologyId) AS technologyId, " +
+                                                "GROUP_CONCAT(technology.technologyName) AS technologyName, " +
+                                                "GROUP_CONCAT(requirement.years) AS years, " +
+                                                "GROUP_CONCAT(requirement.priority) AS priority " +
+                                            "FROM positions " +
+                                                "INNER JOIN requirement ON positions.positionId = requirement.positionId " +
+                                                "INNER JOIN technology ON technology.technologyId = requirement.technologyId " +
+                                            "GROUP BY positions.positionId) AS position ON phc.positionId = position.positionId " +
+                            "WHERE position.positionId = ?";
 
             List<Entity> matches;       // The List holding the data returned from the database.
 
@@ -581,7 +574,6 @@ public class DBPositionQueryHandler extends DBUtils implements EntityDbHandler {
                 while (resultSet.next()) {
                     int positionId = resultSet.getInt("positionId");                            // The ID of the Position.
                     int hrId = resultSet.getInt("hrId");                                        // The ID of the HR which is responsible for the Position.
-//                    int companyId = resultSet.getInt("companyId");                              // The ID of the Company for which the Position is opened.
                     String positionName = resultSet.getString("positionName");                  // The name of the Position.
                     String hrFirstName = resultSet.getString("hrFirstName");                    // The first name of the HR.
                     String hrLastName = resultSet.getString("hrLastName");                      // The last name of the HR.
@@ -646,75 +638,78 @@ public class DBPositionQueryHandler extends DBUtils implements EntityDbHandler {
      */
     public List<Entity> buildRatingData(ResultSet resultSet) {
         List<Entity> data = new ArrayList<Entity>();
-        ArrayList<Requirement> positionRequirement = new ArrayList<Requirement>();            // The List holding all details of the Requirement for a Position.
+        ArrayList<Requirement> positionRequirements = new ArrayList<Requirement>();  // The List holding all details of the Requirements for a Position.
+        ArrayList<Candidate> candidateApplicant = new ArrayList<Candidate>();       // The List holding all details for the Candidate applied for the Position.
+        Position position;
 
         if (resultSet != null) {
             try {
                 while (resultSet.next()) {
                     Candidate candidate;
-                    Experience experience;
-                    int positionId = resultSet.getInt("positionId");                            // The ID of the Position.
-                    String positionName = resultSet.getString("positionName");                  // The name of the Position.
-                    int candidateId = resultSet.getInt("candidateId");                          // The ID of the Candidate which applied for the position.
-                    String candidateFirstName = resultSet.getString("candidateFirstName");      // The first name of the Candidate.
-                    String candidateLastName = resultSet.getString("candidateLastName");        // The last name of the Candidate.
-                    int age = resultSet.getInt("age");                                          // The age of the Candidate.
-                    String candidateEmail = resultSet.getString("candidateEmail");              // The email of the Candidate.
-                    String candidateExpStr = resultSet.getString("Experience");                 // The string holding the names of the technologies the candidate has experience with.
-                    String candidateYearsStr = resultSet.getString("Years");                    // The string holding the candidate's years of experience with the technologies.
-                    String requirementStr = resultSet.getString("Requirements");                // The string holding the names of the technologies the position requires experience with.
-                    String requirementYearsStr = resultSet.getString("ReqYears");               // The string holding the years of experience with a technology that the position requires.
-                    String requirementPriorityStr = resultSet.getString("Priority");            // The string holding the priority of the requirement.
-
-                    //System.out.println("REEEEEEEEEEEEEEEEEEEEE: " + requirementStr);
-
-                    ArrayList<Candidate> candidateApplicant = new ArrayList<Candidate>();               // The List holding all details for the Candidate applied for the Position.
+                    int positionId = resultSet.getInt("positionId");                    // The ID of the Position.
+                    String positionName = resultSet.getString("positionName");          // The name of the Position.
+                    String applicantsStr = resultSet.getString("Applicants");           // The string holding the candidate's years of experience with the technologies.
+                    String requirementStr = resultSet.getString("Requirements");        // The string holding the names of the technologies the position requires experience with.
+                    String requirementYearsStr = resultSet.getString("ReqYears");       // The string holding the years of experience with a technology that the position requires.
+                    String requirementPriorityStr = resultSet.getString("Priority");    // The string holding the priority of the requirement.
 
                     // Get the details of the Position Requirements.
-                    if (data.size() == 0 || (data.get(data.size() - 1).getId() != positionId)) {
-                        String[] requirementTech = requirementStr.split(",");
-                        String[] requirementYears = requirementYearsStr.split(",");
-                        String[] requirementPriority = requirementPriorityStr.split(",");
-                        for (int i = 0; i < requirementTech.length; i ++) {
-                            // Get the details for each Requirement (Technology, years and priority).
+                    String[] requirementTech = requirementStr.split(",");
+                    String[] requirementYears = requirementYearsStr.split(",");
+                    String[] requirementPriority = requirementPriorityStr.split(",");
+                    for (int i = 0; i < requirementTech.length; i ++) {
+                        // Get the details for each Requirement (Technology, years and priority).
+                        String technologyName = requirementTech[i];                 // The name of the Technology which is required for the Position.
+                        int years = Integer.parseInt(requirementYears[i]);          // The years of experience with certain Technology required for the Position.
+                        int priority = Integer.parseInt(requirementPriority[i]);    // The priority of the Requirement for the Position.
 
-                            String technologyName = requirementTech[i];                 // The name of the Technology which is required for the Position.
-                            int years = Integer.parseInt(requirementYears[i]);          // The years of experience with certain Technology required for the Position.
-                            int priority = Integer.parseInt(requirementPriority[i]);    // The priority of the Requirement for the Position.
-
-                            Requirement requirement = new Requirement(positionId, technologyName, years, priority);
-                            positionRequirement.add(requirement);
-                        }
+                        Requirement requirement = new Requirement(positionId, technologyName, years, priority);
+                        positionRequirements.add(requirement);
                     }
 
                     // Get the details of each candidate.
-                    String[] candidateExp = candidateExpStr.split(",");
-                    String[] candidateExpYears = candidateYearsStr.split(",");
-                    ArrayList<Experience> candidateExperience = new ArrayList<Experience>();
+                    String[] candidates = applicantsStr.split(";");
+                    for (String tempCandidate : candidates) {
+                        ArrayList<Experience> candidateExperience = new ArrayList<Experience>();
+                        // Extract the details for the basic object (ID, names, age and email).
+                        String[] candidateDetails = tempCandidate.split("_");
+                        int candidateId = Integer.parseInt(candidateDetails[0]);
+                        String candidateFirstName = candidateDetails[1];
+                        String candidateLastName = candidateDetails[2];
+                        int age = Integer.parseInt(candidateDetails[3]);
+                        String candidateEmail = candidateDetails[4];
 
-                    candidate = new Candidate(candidateId, candidateFirstName, candidateLastName, age, candidateEmail);
+                        // Create the Candidate object.
+                        candidate = new Candidate(candidateId, candidateFirstName, candidateLastName, age, candidateEmail);
 
-                    for (int i = 0; i < candidateExp.length; i ++) {
-                        String technologyName = candidateExp[i];                // The name of the Technology.
-                        int years = Integer.parseInt(candidateExpYears[i]);     // The years of experience the Candidate has with that Technology.
+                        String[] candidateTechExp = candidateDetails[5].split(",");
+                        String[] candidateYearsExp = candidateDetails[6].split(",");
+                        for (int j = 0; j < candidateTechExp.length; j++) {
+                            String technologyName = candidateTechExp[j];
+                            int techYears = Integer.parseInt(candidateYearsExp[j]);
 
-                        experience = new Experience();
-                        experience.setTechnologyName(technologyName);
-                        experience.setYears(years);
-                        candidateExperience.add(experience);
+                            Experience experience = new Experience();
+                            experience.setCandidateId(candidateId);
+                            experience.setTechnologyName(technologyName);
+                            experience.setYears(techYears);
+
+                            candidateExperience.add(experience);
+                        }
+
+                        candidate.setExperiences(candidateExperience);
+                        candidateApplicant.add(candidate);
                     }
 
-                    candidate.setExperiences(candidateExperience);
-                    candidateApplicant.add(candidate);
-
                     // Create the Position object, set its Requirements and put it into the List.
-                    Position position = new Position();
+                    position = new Position();
                     position.setId(positionId);
                     position.setPositionName(positionName);
-                    position.setRequirements(positionRequirement);
+                    position.setRequirements(positionRequirements);
                     position.setApplicants(candidateApplicant);
+
                     RatingCalculator ratingCalculator = new RatingCalculator(position);
                     ratingCalculator.calculatePoints();
+                    position.sortByRating();
                     data.add(position);
                 }
             } catch (SQLException e) {
